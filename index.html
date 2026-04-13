@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice → Energy → Learning</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background: linear-gradient(to bottom, #e8f2ff, #ffffff);
+  color: #333;
+}
+
+h2 {
+  text-align: center;
+}
+
+.screen { display: none; }
+.active { display: block; }
+
+button {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  margin: 8px 0;
+  font-size: 16px;
+  border-radius: 14px;
+  border: none;
+  background-color: #e3ecff;
+}
+
+button.selected {
+  background-color: #4a90e2;
+  color: white;
+}
+
+.next {
+  background-color: #6fcf97;
+  color: white;
+}
+
+.secondary {
+  background-color: #f2f2f2;
+}
+
+.small {
+  font-size: 14px;
+  padding: 10px;
+}
+
+.card {
+  background: white;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+</style>
+</head>
+
+<body>
+
+<h2>Practice → Energy → Learning</h2>
+
+<div id="screen1" class="screen active">
+<h3>Where is the energy?</h3>
+<button onclick="select(this,'energy','Pulled')">← Pulled Away</button>
+<button onclick="select(this,'energy','Mixed')">Mixed</button>
+<button onclick="select(this,'energy','Held')">→ Held by Intention</button>
+<button class="next" onclick="next(2)">Next</button>
+</div>
+
+<div id="screen2" class="screen">
+<h3>Field State</h3>
+<button onclick="select(this,'field','Thready')">🌫 Thready</button>
+<button onclick="select(this,'field','Settling')">🌊 Settling</button>
+<button onclick="select(this,'field','Coherent')">🌱 Coherent</button>
+<button onclick="select(this,'field','Vibrant')">🔥 Vibrant</button>
+<button class="next" onclick="next(3)">Next</button>
+</div>
+
+<div id="screen3" class="screen">
+<h3>Moves Used (max 2)</h3>
+<button onclick="limitToggle(this,'moves','Language')">🗣️ Language</button>
+<button onclick="limitToggle(this,'moves','Breathing')">🌬️ Breathing</button>
+<button onclick="limitToggle(this,'moves','Clarity')">🎯 Clarity</button>
+<button onclick="limitToggle(this,'moves','Focus')">⏱️ Focus</button>
+<button onclick="limitToggle(this,'moves','Interaction')">🤝 Interaction</button>
+<button class="next" onclick="next(4)">Next</button>
+</div>
+
+<div id="screen4" class="screen">
+<h3>What shifted?</h3>
+<button onclick="toggle(this,'shift','Engagement')">Engagement ↑</button>
+<button onclick="toggle(this,'shift','Language')">Language ↑</button>
+<button onclick="toggle(this,'shift','Focus')">Focus ↑</button>
+<button onclick="toggle(this,'shift','Clarity')">Clarity ↑</button>
+<button onclick="toggle(this,'shift','None')">No clear shift</button>
+<button class="next" onclick="next(5)">Next</button>
+</div>
+
+<div id="screen5" class="screen">
+<h3>Did students know what to do?</h3>
+<button onclick="select(this,'student','Yes')">Yes</button>
+<button onclick="select(this,'student','Partial')">Partial</button>
+<button onclick="select(this,'student','No')">No</button>
+<button class="next" onclick="next(6)">Next</button>
+</div>
+
+<div id="screen6" class="screen">
+<h3>Early Warning Signal (optional)</h3>
+<button onclick="toggle(this,'preslip','Clarity')">Clarity off</button>
+<button onclick="toggle(this,'preslip','Energy')">Energy dropping</button>
+<button onclick="toggle(this,'preslip','Distraction')">Distraction rising</button>
+<button onclick="toggle(this,'preslip','Pacing')">Pacing off</button>
+
+<h3>Reset Used?</h3>
+<button onclick="select(this,'reset','Breathing')">🌬️ Breathing</button>
+<button onclick="select(this,'reset','Proximity')">👣 Proximity</button>
+<button onclick="select(this,'reset','None')">None</button>
+
+<button class="next" onclick="saveEntry()">Save Entry</button>
+<button class="secondary small" onclick="next(7)">View History</button>
+</div>
+
+<div id="screen7" class="screen">
+<h3>Session History</h3>
+<div id="history"></div>
+<button class="next" onclick="location.reload()">New Entry</button>
+</div>
+
+<script>
+
+let data = {};
+
+function select(btn, key, value) {
+  document.querySelectorAll("button").forEach(b => {
+    if (b.innerText === btn.innerText) b.classList.add("selected");
+  });
+  data[key] = value;
+}
+
+function toggle(btn, key, value) {
+  btn.classList.toggle("selected");
+  if (!data[key]) data[key] = [];
+  if (data[key].includes(value)) {
+    data[key] = data[key].filter(v => v !== value);
+  } else {
+    data[key].push(value);
+  }
+}
+
+function limitToggle(btn, key, value) {
+  if (!data[key]) data[key] = [];
+
+  if (data[key].includes(value)) {
+    data[key] = data[key].filter(v => v !== value);
+    btn.classList.remove("selected");
+  } else {
+    if (data[key].length < 2) {
+      data[key].push(value);
+      btn.classList.add("selected");
+    } else {
+      alert("Select max 2 moves");
+    }
+  }
+}
+
+function next(screen) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById("screen" + screen).classList.add("active");
+
+  if (screen === 7) loadHistory();
+}
+
+function saveEntry() {
+  let entries = JSON.parse(localStorage.getItem("entries") || "[]");
+  entries.push({ ...data, time: new Date().toLocaleTimeString() });
+  localStorage.setItem("entries", JSON.stringify(entries));
+
+  next(7);
+}
+
+function loadHistory() {
+  let entries = JSON.parse(localStorage.getItem("entries") || "[]");
+  let container = document.getElementById("history");
+  container.innerHTML = "";
+
+  entries.reverse().forEach(e => {
+    let div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <b>${e.time}</b><br>
+      Energy: ${e.energy || "-"}<br>
+      Field: ${e.field || "-"}<br>
+      Moves: ${(e.moves || []).join(", ")}<br>
+      Shift: ${(e.shift || []).join(", ")}<br>
+      Student: ${e.student || "-"}<br>
+      Reset: ${e.reset || "-"}
+    `;
+    container.appendChild(div);
+  });
+}
+
+</script>
+
+</body>
+</html>
