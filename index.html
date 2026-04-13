@@ -8,92 +8,70 @@
 body {
   font-family: -apple-system, sans-serif;
   margin: 0;
-  background: linear-gradient(180deg,#eef6ff,#ffffff);
-  transition: background 0.6s ease;
-}
-
-.header {
-  text-align: center;
-  padding: 14px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
-
-.container {
-  padding: 16px;
+  background: radial-gradient(circle,#eef6ff,#ffffff);
+  transition: background 0.8s ease;
 }
 
 .screen {
-  display: none;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: all 0.4s ease;
+  display:none;
+  padding:20px;
+  text-align:center;
 }
 
 .screen.active {
-  display: block;
-  opacity: 1;
-  transform: translateY(0);
+  display:block;
 }
 
-.card {
-  background: rgba(255,255,255,0.7);
-  backdrop-filter: blur(12px);
-  border-radius: 20px;
-  padding: 16px;
-  margin-bottom: 14px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+h1 {
+  font-size:26px;
+  margin-bottom:10px;
+}
+
+p {
+  opacity:0.7;
 }
 
 button {
-  width: 100%;
-  padding: 14px;
-  margin: 6px 0;
-  border-radius: 16px;
-  border: none;
-  background: rgba(255,255,255,0.85);
-  transition: all 0.25s ease;
+  padding:14px;
+  width:80%;
+  margin-top:20px;
+  border:none;
+  border-radius:16px;
+  background:#4a90e2;
+  color:white;
+  font-size:16px;
 }
 
-button:hover {
-  transform: scale(1.02);
+.card {
+  background:rgba(255,255,255,0.75);
+  border-radius:20px;
+  padding:16px;
+  margin:16px;
 }
 
-button.selected {
-  transform: scale(1.04);
-  color: white;
+.pulse {
+  width:120px;
+  height:120px;
+  margin:20px auto;
+  border-radius:50%;
+  background:radial-gradient(circle,#6fcf97,#4caf7d);
+  animation:pulse 2.5s infinite;
+  opacity:0.7;
 }
 
-.red { background: linear-gradient(135deg,#ff6b6b,#ff8e8e); }
-.blue { background: linear-gradient(135deg,#4a90e2,#6fb3ff); }
-.green { background: linear-gradient(135deg,#6fcf97,#8ee3b5); }
-
-.primary {
-  background: linear-gradient(135deg,#6fcf97,#4caf7d);
-  color: white;
+@keyframes pulse {
+  0% { transform:scale(1); opacity:0.7; }
+  50% { transform:scale(1.2); opacity:1; }
+  100% { transform:scale(1); opacity:0.7; }
 }
+
+.low { background:radial-gradient(circle,#ff6b6b,#ff8e8e); }
+.mid { background:radial-gradient(circle,#4a90e2,#7fb6ff); }
+.high { background:radial-gradient(circle,#6fcf97,#8ee3b5); }
 
 .metric {
-  font-size: 30px;
-  font-weight: 600;
-}
-
-canvas {
-  width: 100%;
-  height: 160px;
-}
-
-.nav {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  display: flex;
-  background: white;
-}
-
-.nav button {
-  flex: 1;
-  border-radius: 0;
+  font-size:32px;
+  font-weight:600;
 }
 
 </style>
@@ -101,126 +79,118 @@ canvas {
 
 <body>
 
-<div class="header">Coherence</div>
+<!-- ONBOARDING -->
+<div id="on1" class="screen active">
+<h1>Teaching is constant decision-making</h1>
+<p>But we rarely see what actually works.</p>
+<button onclick="next('on2')">Next</button>
+</div>
 
-<div class="container">
+<div id="on2" class="screen">
+<h1>Learning depends on coherence</h1>
+<p>When energy is aligned, learning strengthens.</p>
+<button onclick="next('on3')">Next</button>
+</div>
+
+<div id="on3" class="screen">
+<h1>Capture → See → Improve</h1>
+<p>In 20 seconds, you’ll begin to see patterns.</p>
+<button onclick="startApp()">Start</button>
+</div>
 
 <!-- CAPTURE -->
-<div id="capture" class="screen active">
+<div id="capture" class="screen">
 
 <div class="card">
 <h3>Energy</h3>
-<button onclick="select(this,'energy','Pulled','red')" class="red">Pulled</button>
-<button onclick="select(this,'energy','Mixed','blue')" class="blue">Mixed</button>
-<button onclick="select(this,'energy','Held','green')" class="green">Held</button>
+<button onclick="setEnergy('Pulled')">Pulled</button>
+<button onclick="setEnergy('Mixed')">Mixed</button>
+<button onclick="setEnergy('Held')">Held</button>
 </div>
 
 <div class="card">
 <h3>Focus</h3>
-<button onclick="select(this,'focus','2')">Low</button>
-<button onclick="select(this,'focus','3')">Medium</button>
-<button onclick="select(this,'focus','5')">High</button>
+<button onclick="setFocus(2)">Low</button>
+<button onclick="setFocus(3)">Medium</button>
+<button onclick="setFocus(5)">High</button>
 </div>
 
-<button class="primary" onclick="saveEntry()">Save</button>
+<button onclick="save()">Save</button>
 
 </div>
 
 <!-- DASHBOARD -->
 <div id="dashboard" class="screen">
 
-<div class="card">
-<div class="metric" id="focusAvg"></div>
-Focus
-</div>
+<div class="pulse" id="pulse"></div>
 
 <div class="card">
-<canvas id="chart"></canvas>
+<div class="metric" id="avg"></div>
+<p>Average Focus</p>
 </div>
 
 <div class="card">
-<b>Insight</b>
-<div id="insight"></div>
+<p id="insight"></p>
 </div>
 
-</div>
+<button onclick="next('capture')">New Entry</button>
 
-</div>
-
-<div class="nav">
-<button onclick="show('capture')">Capture</button>
-<button onclick="show('dashboard')">Dashboard</button>
 </div>
 
 <script>
 
 let data={};
 
-function show(screen){
+function next(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById(screen).classList.add("active");
-  if(screen==="dashboard") loadDashboard();
+  document.getElementById(id).classList.add("active");
 }
 
-function select(btn,key,val,color){
-  btn.classList.add("selected");
-  data[key]=val;
-
-  if(color==="green"){
-    document.body.style.background="linear-gradient(#e6fff0,#ffffff)";
-  } else if(color==="red"){
-    document.body.style.background="linear-gradient(#ffeaea,#ffffff)";
-  } else {
-    document.body.style.background="linear-gradient(#eef6ff,#ffffff)";
-  }
+function startApp(){
+  next("capture");
 }
 
-function saveEntry(){
+function setEnergy(val){
+  data.energy=val;
+}
+
+function setFocus(val){
+  data.focus=val;
+}
+
+function save(){
   let entries=JSON.parse(localStorage.getItem("entries")||"[]");
-  entries.push({...data});
+  entries.push(data);
   localStorage.setItem("entries",JSON.stringify(entries));
-  data={};
-  alert("Saved");
+  loadDashboard();
 }
 
 function loadDashboard(){
+  next("dashboard");
+
   let entries=JSON.parse(localStorage.getItem("entries")||"[]");
 
-  let focus=entries.map(e=>Number(e.focus||0));
+  let focus=entries.map(e=>e.focus||0);
   let avg=(focus.reduce((a,b)=>a+b,0)/focus.length||0).toFixed(1);
 
-  document.getElementById("focusAvg").innerText=avg;
+  document.getElementById("avg").innerText=avg;
 
-  drawChart(focus);
+  // pulse color
+  let pulse=document.getElementById("pulse");
+  pulse.className="pulse";
 
-  let insight = avg < 3 
-    ? "Focus is low → add structure or reset"
-    : "Focus stable → maintain patterns";
+  if(avg < 3) pulse.classList.add("low");
+  else if(avg < 4) pulse.classList.add("mid");
+  else pulse.classList.add("high");
+
+  // insight
+  let insight = avg < 3
+    ? "Focus is breaking. Begin with structure or reset."
+    : avg < 4
+    ? "Focus is building. Add interaction earlier."
+    : "Coherence is strong. Maintain your approach.";
 
   document.getElementById("insight").innerText=insight;
-}
-
-function drawChart(data){
-  let canvas=document.getElementById("chart");
-  let ctx=canvas.getContext("2d");
-
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  ctx.beginPath();
-  ctx.moveTo(0,150-data[0]*25);
-
-  data.forEach((v,i)=>{
-    ctx.quadraticCurveTo(
-      i*50,150-v*25,
-      (i+1)*50,150-(data[i+1]||v)*25
-    );
-  });
-
-  ctx.strokeStyle="#4a90e2";
-  ctx.lineWidth=3;
-  ctx.shadowBlur=10;
-  ctx.shadowColor="#4a90e2";
-  ctx.stroke();
 }
 
 </script>
