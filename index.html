@@ -2,636 +2,706 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Coherence Works</title>
 <style>
-  :root{
-    --bg1:#eef6f9; --bg2:#ffffff; --ink:#3f5f73; --muted:#6b8798;
-    --card:rgba(255,255,255,0.88); --line:rgba(63,95,115,0.10);
-    --blue1:#4a90e2; --blue2:#6fb3ff; --green1:#6fcf97; --green2:#8ee3b5;
-    --red1:#ff7d7d; --red2:#ffabab; --teal1:#5ab7c9; --teal2:#8fd7de;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:linear-gradient(180deg,var(--bg1),var(--bg2))}
-  .header{text-align:center;padding:20px 16px 10px}
-  .logo{font-size:28px;font-weight:600;letter-spacing:.2px}
-  .tagline{margin-top:4px;color:var(--muted);font-size:14px}
-  .container{padding:16px;padding-bottom:110px;max-width:1000px;margin:0 auto}
-  .screen{display:none}.screen.active{display:block}
-  .card{background:var(--card);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.75);border-radius:22px;padding:16px;margin-bottom:14px;box-shadow:0 10px 28px rgba(0,0,0,0.05)}
-  .section-title{font-size:13px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin:0 0 10px 0}
-  h3{margin:0 0 10px 0;font-size:19px;font-weight:600}
-  .helper{margin:4px 0 12px 0;color:var(--muted);font-size:14px;line-height:1.35}
-  label{display:block;margin:10px 0 6px;font-size:14px;color:var(--muted)}
-  select, textarea, button{width:100%;font-size:16px;border:none;border-radius:16px;padding:14px}
-  select, textarea{background:#f3f8fb;color:var(--ink);border:1px solid var(--line)}
-  textarea{min-height:92px;resize:vertical}
-  .button-grid{display:grid;gap:8px}
-  .button-grid.two{grid-template-columns:1fr 1fr}.button-grid.three{grid-template-columns:repeat(3,1fr)}.button-grid.five{grid-template-columns:repeat(5,1fr)}
-  button{background:#e8f2f7;color:var(--ink);transition:transform .15s ease, box-shadow .15s ease, background .15s ease, color .15s ease;border:1px solid transparent}
-  button:active{transform:scale(.98)}
-  button.selected{color:#fff;transform:translateY(-1px);box-shadow:0 8px 16px rgba(63,95,115,0.18)}
-  .single.selected,.primary{background:linear-gradient(135deg,var(--blue1),var(--blue2))}
-  .multi.selected{background:linear-gradient(135deg,var(--green1),var(--green2))}
-  .energy-pulled.selected{background:linear-gradient(135deg,var(--red1),var(--red2))}
-  .energy-mixed.selected{background:linear-gradient(135deg,var(--teal1),var(--teal2))}
-  .energy-held.selected{background:linear-gradient(135deg,var(--green1),var(--green2))}
-  .actions{display:grid;gap:10px;margin-top:8px}
-  .ghost{background:#f3f8fb;border:1px solid var(--line)}
-  .nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:rgba(255,255,255,0.88);backdrop-filter:blur(10px);border-top:1px solid var(--line);z-index:20}
-  .nav button{border-radius:0;background:transparent;padding:16px 10px;color:var(--muted)}
-  .nav button.active{color:var(--ink);font-weight:600;background:rgba(74,144,226,0.07)}
-  .stepper{display:flex;gap:8px;margin-bottom:14px}
-  .step{flex:1;height:8px;border-radius:999px;background:#dfeaf0}.step.active{background:linear-gradient(90deg,var(--blue1),var(--teal1))}
-  .subgrid,.metrics,.filters{display:grid;gap:12px}
-  @media (min-width:700px){.subgrid.two,.metrics{grid-template-columns:1fr 1fr}.filters{grid-template-columns:repeat(4,1fr)}}
-  .metric-card{text-align:center;padding:18px 14px}
-  .metric{font-size:34px;font-weight:700;line-height:1;color:var(--ink)}
-  .metric-sub{margin-top:8px;font-size:14px;color:var(--muted)}
-  .hero{display:flex;flex-direction:column;align-items:center;margin-bottom:16px}
-  .pulse-wrap{display:flex;justify-content:center;margin-bottom:10px}
-  .pulse{width:96px;height:96px;border-radius:50%;background:radial-gradient(circle, rgba(74,144,226,.95), rgba(111,179,255,.30));animation:pulse 2.6s infinite ease-in-out;transition:all .4s ease}
-  .pulse.low{background:radial-gradient(circle, rgba(255,125,125,.95), rgba(255,171,171,.28))}
-  .pulse.mid{background:radial-gradient(circle, rgba(90,183,201,.95), rgba(143,215,222,.28))}
-  .pulse.high{background:radial-gradient(circle, rgba(111,207,151,.95), rgba(142,227,181,.32))}
-  @keyframes pulse{0%{transform:scale(1);opacity:.88}50%{transform:scale(1.08);opacity:1}100%{transform:scale(1);opacity:.88}}
-  .hero-label{font-size:14px;color:var(--muted)}
-  .insight-card{border-left:4px solid #7db7d9;background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(238,246,249,.92))}
-  .insight-label{font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:8px}
-  .insight-text{font-size:17px;line-height:1.4}
-  canvas{width:100%;height:180px;display:block}
-  .mini-list{display:grid;gap:8px}
-  .mini-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
-  .mini-row:first-child{border-top:none}
-  .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#eef6f9;border:1px solid var(--line);margin:4px 6px 0 0;font-size:13px;color:var(--ink)}
-  .pill.good{background:linear-gradient(135deg,var(--green1),var(--green2));color:#fff;border:none}
-  .pill.mixed{background:linear-gradient(135deg,var(--teal1),var(--teal2));color:#fff;border:none}
-  .pill.low{background:linear-gradient(135deg,var(--red1),var(--red2));color:#fff;border:none}
-  .summary{font-size:14px;color:var(--muted);line-height:1.4;margin-top:10px}
-  .toast{position:fixed;bottom:86px;left:50%;transform:translateX(-50%);background:#3f5f73;color:#fff;padding:10px 18px;border-radius:999px;opacity:0;transition:opacity .25s ease;z-index:30;pointer-events:none}
-  .subsection-title{font-size:15px;font-weight:600;margin:8px 0 10px 0}
+:root{
+  --bg1:#eef6f9; --bg2:#ffffff; --ink:#3f5f73; --muted:#6b8798;
+  --card:rgba(255,255,255,0.88); --line:rgba(63,95,115,0.10);
+  --blue1:#4a90e2; --blue2:#6fb3ff; --green1:#6fcf97; --green2:#8ee3b5;
+  --red1:#ff7d7d; --red2:#ffabab; --teal1:#5ab7c9; --teal2:#8fd7de;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:linear-gradient(180deg,var(--bg1),var(--bg2))}
+.header{text-align:center;padding:20px 16px 10px}
+.logo{font-size:28px;font-weight:600}
+.tagline{margin-top:4px;color:var(--muted);font-size:14px}
+.container{padding:16px;padding-bottom:110px;max-width:1000px;margin:0 auto}
+.screen{display:none}.screen.active{display:block}
+.card{background:var(--card);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.75);border-radius:22px;padding:16px;margin-bottom:14px;box-shadow:0 10px 28px rgba(0,0,0,0.05)}
+.section-title{font-size:13px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin:0 0 10px 0}
+h3{margin:0 0 10px 0;font-size:19px;font-weight:600}
+.helper,.summary{margin:4px 0 12px 0;color:var(--muted);font-size:14px;line-height:1.4}
+label{display:block;margin:10px 0 6px;font-size:14px;color:var(--muted)}
+select, textarea, button, input{width:100%;font-size:16px;border:none;border-radius:16px;padding:14px}
+select, textarea, input{background:#f3f8fb;color:var(--ink);border:1px solid var(--line)}
+textarea{min-height:92px;resize:vertical}
+.button-grid{display:grid;gap:8px}
+.button-grid.two{grid-template-columns:1fr 1fr}.button-grid.three{grid-template-columns:repeat(3,1fr)}.button-grid.five{grid-template-columns:repeat(5,1fr)}
+button{background:#e8f2f7;color:var(--ink);transition:transform .15s ease, box-shadow .15s ease, background .15s ease, color .15s ease;border:1px solid transparent}
+button:active{transform:scale(.98)}
+button.selected{color:#fff;transform:translateY(-1px);box-shadow:0 8px 16px rgba(63,95,115,0.18)}
+.single.selected,.primary{background:linear-gradient(135deg,var(--blue1),var(--blue2))}
+.multi.selected{background:linear-gradient(135deg,var(--green1),var(--green2))}
+.energy-pulled.selected{background:linear-gradient(135deg,var(--red1),var(--red2))}
+.energy-mixed.selected{background:linear-gradient(135deg,var(--teal1),var(--teal2))}
+.energy-held.selected{background:linear-gradient(135deg,var(--green1),var(--green2))}
+.actions{display:grid;gap:10px;margin-top:8px}
+.ghost{background:#f3f8fb;border:1px solid var(--line)}
+.nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:rgba(255,255,255,0.88);backdrop-filter:blur(10px);border-top:1px solid var(--line);z-index:20}
+.nav button{border-radius:0;background:transparent;padding:16px 10px;color:var(--muted)}
+.nav button.active{color:var(--ink);font-weight:600;background:rgba(74,144,226,0.07)}
+.stepper{display:flex;gap:8px;margin-bottom:14px}
+.step{flex:1;height:8px;border-radius:999px;background:#dfeaf0}.step.active{background:linear-gradient(90deg,var(--blue1),var(--teal1))}
+.subgrid,.metrics,.filters{display:grid;gap:12px}
+@media (min-width:700px){.subgrid.two,.metrics{grid-template-columns:1fr 1fr}.filters{grid-template-columns:repeat(4,1fr)}}
+.metric-card{text-align:center;padding:18px 14px}
+.metric{font-size:34px;font-weight:700;line-height:1;color:var(--ink)}
+.metric-sub{margin-top:8px;font-size:14px;color:var(--muted)}
+.hero{display:flex;flex-direction:column;align-items:center;margin-bottom:16px}
+.pulse-wrap{display:flex;justify-content:center;margin-bottom:10px}
+.pulse{width:96px;height:96px;border-radius:50%;background:radial-gradient(circle, rgba(74,144,226,.95), rgba(111,179,255,.30));animation:pulse 2.6s infinite ease-in-out;transition:all .4s ease}
+.pulse.low{background:radial-gradient(circle, rgba(255,125,125,.95), rgba(255,171,171,.28))}
+.pulse.mid{background:radial-gradient(circle, rgba(90,183,201,.95), rgba(143,215,222,.28))}
+.pulse.high{background:radial-gradient(circle, rgba(111,207,151,.95), rgba(142,227,181,.32))}
+@keyframes pulse{0%{transform:scale(1);opacity:.88}50%{transform:scale(1.08);opacity:1}100%{transform:scale(1);opacity:.88}}
+.hero-label{font-size:14px;color:var(--muted)}
+.insight-card{border-left:4px solid #7db7d9;background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(238,246,249,.92))}
+.insight-label{font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:8px}
+.insight-text{font-size:17px;line-height:1.4}
+canvas{width:100%;height:180px;display:block}
+.mini-list{display:grid;gap:8px}
+.mini-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.mini-row:first-child{border-top:none}
+.pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#eef6f9;border:1px solid var(--line);margin:4px 6px 0 0;font-size:13px;color:var(--ink)}
+.pill.good{background:linear-gradient(135deg,var(--green1),var(--green2));color:#fff;border:none}
+.pill.mixed{background:linear-gradient(135deg,var(--teal1),var(--teal2));color:#fff;border:none}
+.pill.low{background:linear-gradient(135deg,var(--red1),var(--red2));color:#fff;border:none}
+.toast{position:fixed;bottom:86px;left:50%;transform:translateX(-50%);background:#3f5f73;color:#fff;padding:10px 18px;border-radius:999px;opacity:0;transition:opacity .25s ease;z-index:30;pointer-events:none}
+.inline-actions,.small-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.inline-actions button,.small-actions button{width:auto;padding:10px 14px;border-radius:12px}
+.hidden{display:none}
+.focus-note{margin-top:10px;color:var(--muted);font-size:13px}
+.subsection-title{font-size:15px;font-weight:600;margin:8px 0 10px 0}
+.panel{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
 </style>
 </head>
 <body>
-  <div class="header">
-    <div class="logo">Coherence Works</div>
-    <div class="tagline">Integrated target vs used insight</div>
+<div class="header">
+  <div class="logo">Coherence Works</div>
+  <div class="tagline">Planning/reflection panel</div>
+</div>
+
+<div class="container">
+  <div id="captureScreen" class="screen active">
+    <div class="stepper">
+      <div class="step active" id="step1bar"></div><div class="step" id="step2bar"></div><div class="step" id="step3bar"></div><div class="step" id="step4bar"></div>
+    </div>
+
+    <div id="step1" class="capture-step">
+      <div class="card">
+        <div class="section-title">Step 1</div>
+        <h3>Who is this entry about?</h3>
+        <div class="helper">Start with the target, timing, and grouping context.</div>
+        <label for="targetType">Entry target</label>
+        <select id="targetType" onchange="handleTargetTypeChange()">
+          <option value="Whole Class">Whole Class</option><option value="Group">Group</option><option value="Individual Student">Individual Student</option>
+        </select>
+        <label for="entityId">Entity ID</label>
+        <select id="entityId"></select>
+        <div class="subgrid two">
+          <div><label for="blockDay">Block of day</label><select id="blockDay"><option>Morning</option><option>Mid-morning</option><option>After Recess</option><option>After Lunch</option><option>End of Day</option></select></div>
+          <div><label for="activityType">Activity type</label><select id="activityType"><option>Whole Group</option><option>Partner</option><option>Small Group</option><option>Independent</option><option>Transition</option><option>Intervention / Support</option></select></div>
+        </div>
+        <div class="subgrid two">
+          <div><label for="collabContext">Collaboration context</label><select id="collabContext"><option>Solo</option><option>Partner</option><option>Group</option><option>Mixed / Rotating</option></select></div>
+          <div><label for="collabQuality">Collaboration quality</label><select id="collabQuality"><option>Strong</option><option>Functional</option><option>Uneven</option><option>Strained</option><option>Not Applicable</option></select></div>
+        </div>
+      </div>
+      <div class="actions"><button class="primary" onclick="goToStep(2)">Next</button></div>
+    </div>
+
+    <div id="step2" class="capture-step" style="display:none;">
+      <div class="card">
+        <div class="section-title">Step 2</div>
+        <h3>Core learning state</h3>
+        <div class="helper">Capture the overall condition of the moment.</div>
+        <label>Energy direction</label>
+        <div class="button-grid three" data-group="energy">
+          <button class="single energy-pulled" onclick="selectSingle(event,'energy','Pulled','energy')">Pulled</button>
+          <button class="single energy-mixed" onclick="selectSingle(event,'energy','Mixed','energy')">Mixed</button>
+          <button class="single energy-held" onclick="selectSingle(event,'energy','Held','energy')">Held</button>
+        </div>
+        <label>Focus level</label>
+        <div class="button-grid five" data-group="focus">
+          <button class="single" onclick="selectSingle(event,'focus',1,'focus')">1</button><button class="single" onclick="selectSingle(event,'focus',2,'focus')">2</button><button class="single" onclick="selectSingle(event,'focus',3,'focus')">3</button><button class="single" onclick="selectSingle(event,'focus',4,'focus')">4</button><button class="single" onclick="selectSingle(event,'focus',5,'focus')">5</button>
+        </div>
+        <label>Engagement level</label>
+        <div class="button-grid five" data-group="engagement">
+          <button class="single" onclick="selectSingle(event,'engagement',1,'engagement')">1</button><button class="single" onclick="selectSingle(event,'engagement',2,'engagement')">2</button><button class="single" onclick="selectSingle(event,'engagement',3,'engagement')">3</button><button class="single" onclick="selectSingle(event,'engagement',4,'engagement')">4</button><button class="single" onclick="selectSingle(event,'engagement',5,'engagement')">5</button>
+        </div>
+        <label>Did students know what to do?</label>
+        <div class="button-grid three" data-group="clarity">
+          <button class="single" onclick="selectSingle(event,'studentClarity','Yes','clarity')">Yes</button><button class="single" onclick="selectSingle(event,'studentClarity','Partial','clarity')">Partial</button><button class="single" onclick="selectSingle(event,'studentClarity','No','clarity')">No</button>
+        </div>
+      </div>
+      <div class="actions"><button class="ghost" onclick="goToStep(1)">Back</button><button class="primary" onclick="goToStep(3)">Next</button></div>
+    </div>
+
+    <div id="step3" class="capture-step" style="display:none;">
+      <div class="card">
+        <div class="section-title">Step 3</div>
+        <h3>Moves and supports</h3>
+        <div class="helper">Connect intention, action, and observed lift.</div>
+        <label>Target moves (max 3)</label>
+        <div class="button-grid two">
+          <button class="multi" onclick="toggleMulti(event,'targetMoves','Clarity',3)">Clarity</button>
+          <button class="multi" onclick="toggleMulti(event,'targetMoves','Breathing / Reset',3)">Breathing / Reset</button>
+          <button class="multi" onclick="toggleMulti(event,'targetMoves','Language Production',3)">Language Production</button>
+          <button class="multi" onclick="toggleMulti(event,'targetMoves','Interaction Structure',3)">Interaction Structure</button>
+          <button class="multi" onclick="toggleMulti(event,'targetMoves','Goal Setting',3)">Goal Setting</button>
+          <button class="multi" onclick="toggleMulti(event,'targetMoves','Transition Routine',3)">Transition Routine</button>
+          <button class="multi" onclick="toggleMulti(event,'targetMoves','Regulation Support',3)">Regulation Support</button>
+          <button class="multi" onclick="toggleMulti(event,'targetMoves','Visual Support',3)">Visual Support</button>
+          <button class="multi" onclick="toggleMulti(event,'targetMoves','Reflection / Repair',3)">Reflection / Repair</button>
+          <button class="multi" onclick="toggleMulti(event,'targetMoves','Other',3)">Other</button>
+        </div>
+        <label>Moves used (max 3)</label>
+        <div class="button-grid two">
+          <button class="multi" onclick="toggleMulti(event,'movesUsed','Clarity',3)">Clarity</button>
+          <button class="multi" onclick="toggleMulti(event,'movesUsed','Breathing / Reset',3)">Breathing / Reset</button>
+          <button class="multi" onclick="toggleMulti(event,'movesUsed','Language Production',3)">Language Production</button>
+          <button class="multi" onclick="toggleMulti(event,'movesUsed','Interaction Structure',3)">Interaction Structure</button>
+          <button class="multi" onclick="toggleMulti(event,'movesUsed','Goal Setting',3)">Goal Setting</button>
+          <button class="multi" onclick="toggleMulti(event,'movesUsed','Transition Routine',3)">Transition Routine</button>
+          <button class="multi" onclick="toggleMulti(event,'movesUsed','Regulation Support',3)">Regulation Support</button>
+          <button class="multi" onclick="toggleMulti(event,'movesUsed','Visual Support',3)">Visual Support</button>
+          <button class="multi" onclick="toggleMulti(event,'movesUsed','Reflection / Repair',3)">Reflection / Repair</button>
+          <button class="multi" onclick="toggleMulti(event,'movesUsed','Other',3)">Other</button>
+        </div>
+        <label>What helped most?</label>
+        <select id="helpedMost"><option>Clarity</option><option>Structure</option><option>Regulation</option><option>Interaction</option><option>Language Support</option><option>Momentum</option><option>Other</option></select>
+      </div>
+      <div class="actions"><button class="ghost" onclick="goToStep(2)">Back</button><button class="primary" onclick="goToStep(4)">Next</button></div>
+    </div>
+
+    <div id="step4" class="capture-step" style="display:none;">
+      <div class="card">
+        <div class="section-title">Step 4</div>
+        <h3>Strategic layer</h3>
+        <div class="helper">Tag the support architecture behind the moment.</div>
+        <div class="subgrid two">
+          <div><label for="supportOrigin">Support origin</label><select id="supportOrigin"><option>Site-level goal</option><option>Classroom goal</option><option>Student support plan</option><option>In-the-moment teacher move</option><option>Other</option></select></div>
+          <div><label for="moveType">Move type</label><select id="moveType"><option>Instructional</option><option>Language-support</option><option>Relational</option><option>Regulatory</option><option>Structural / behavioral</option><option>Other</option></select></div>
+        </div>
+        <label for="quickNote">Quick note</label>
+        <textarea id="quickNote" placeholder="What stood out?"></textarea>
+      </div>
+      <div class="actions"><button class="ghost" onclick="goToStep(3)">Back</button><button class="ghost" onclick="saveEntry(false)">Save</button><button class="primary" onclick="saveEntry(true)">Save + View Dashboard</button></div>
+    </div>
   </div>
 
-  <div class="container">
-    <div id="captureScreen" class="screen active">
-      <div class="stepper">
-        <div class="step active" id="step1bar"></div>
-        <div class="step" id="step2bar"></div>
-        <div class="step" id="step3bar"></div>
-        <div class="step" id="step4bar"></div>
-      </div>
-
-      <div id="step1" class="capture-step">
-        <div class="card">
-          <div class="section-title">Step 1</div>
-          <h3>Who is this entry about?</h3>
-          <div class="helper">Start with the target, timing, and grouping context.</div>
-          <label for="targetType">Entry target</label>
-          <select id="targetType" onchange="handleTargetTypeChange()">
-            <option value="Whole Class">Whole Class</option>
-            <option value="Group">Group</option>
-            <option value="Individual Student">Individual Student</option>
-          </select>
-          <label for="entityId">Entity ID</label>
-          <select id="entityId"></select>
-          <div class="subgrid two">
-            <div>
-              <label for="blockDay">Block of day</label>
-              <select id="blockDay">
-                <option>Morning</option><option>Mid-morning</option><option>After Recess</option><option>After Lunch</option><option>End of Day</option>
-              </select>
-            </div>
-            <div>
-              <label for="activityType">Activity type</label>
-              <select id="activityType">
-                <option>Whole Group</option><option>Partner</option><option>Small Group</option><option>Independent</option><option>Transition</option><option>Intervention / Support</option>
-              </select>
-            </div>
-          </div>
-          <div class="subgrid two">
-            <div>
-              <label for="collabContext">Collaboration context</label>
-              <select id="collabContext">
-                <option>Solo</option><option>Partner</option><option>Group</option><option>Mixed / Rotating</option>
-              </select>
-            </div>
-            <div>
-              <label for="collabQuality">Collaboration quality</label>
-              <select id="collabQuality">
-                <option>Strong</option><option>Functional</option><option>Uneven</option><option>Strained</option><option>Not Applicable</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="actions"><button class="primary" onclick="goToStep(2)">Next</button></div>
-      </div>
-
-      <div id="step2" class="capture-step" style="display:none;">
-        <div class="card">
-          <div class="section-title">Step 2</div>
-          <h3>Core learning state</h3>
-          <div class="helper">Capture the overall condition of the moment.</div>
-
-          <label>Energy direction</label>
-          <div class="button-grid three" data-group="energy">
-            <button class="single energy-pulled" onclick="selectSingle(event, 'energy', 'Pulled', 'energy')">Pulled</button>
-            <button class="single energy-mixed" onclick="selectSingle(event, 'energy', 'Mixed', 'energy')">Mixed</button>
-            <button class="single energy-held" onclick="selectSingle(event, 'energy', 'Held', 'energy')">Held</button>
-          </div>
-
-          <label>Focus level</label>
-          <div class="button-grid five" data-group="focus">
-            <button class="single" onclick="selectSingle(event, 'focus', 1, 'focus')">1</button>
-            <button class="single" onclick="selectSingle(event, 'focus', 2, 'focus')">2</button>
-            <button class="single" onclick="selectSingle(event, 'focus', 3, 'focus')">3</button>
-            <button class="single" onclick="selectSingle(event, 'focus', 4, 'focus')">4</button>
-            <button class="single" onclick="selectSingle(event, 'focus', 5, 'focus')">5</button>
-          </div>
-
-          <label>Engagement level</label>
-          <div class="button-grid five" data-group="engagement">
-            <button class="single" onclick="selectSingle(event, 'engagement', 1, 'engagement')">1</button>
-            <button class="single" onclick="selectSingle(event, 'engagement', 2, 'engagement')">2</button>
-            <button class="single" onclick="selectSingle(event, 'engagement', 3, 'engagement')">3</button>
-            <button class="single" onclick="selectSingle(event, 'engagement', 4, 'engagement')">4</button>
-            <button class="single" onclick="selectSingle(event, 'engagement', 5, 'engagement')">5</button>
-          </div>
-
-          <label>Did students know what to do?</label>
-          <div class="button-grid three" data-group="clarity">
-            <button class="single" onclick="selectSingle(event, 'studentClarity', 'Yes', 'clarity')">Yes</button>
-            <button class="single" onclick="selectSingle(event, 'studentClarity', 'Partial', 'clarity')">Partial</button>
-            <button class="single" onclick="selectSingle(event, 'studentClarity', 'No', 'clarity')">No</button>
-          </div>
-        </div>
-        <div class="actions"><button class="ghost" onclick="goToStep(1)">Back</button><button class="primary" onclick="goToStep(3)">Next</button></div>
-      </div>
-
-      <div id="step3" class="capture-step" style="display:none;">
-        <div class="card">
-          <div class="section-title">Step 3</div>
-          <h3>Moves and supports</h3>
-          <div class="helper">Connect intention, action, and observed lift.</div>
-
-          <label>Target moves (max 3)</label>
-          <div class="button-grid two">
-            <button class="multi" onclick="toggleMulti(event, 'targetMoves', 'Clarity', 3)">Clarity</button>
-            <button class="multi" onclick="toggleMulti(event, 'targetMoves', 'Breathing / Reset', 3)">Breathing / Reset</button>
-            <button class="multi" onclick="toggleMulti(event, 'targetMoves', 'Language Production', 3)">Language Production</button>
-            <button class="multi" onclick="toggleMulti(event, 'targetMoves', 'Interaction Structure', 3)">Interaction Structure</button>
-            <button class="multi" onclick="toggleMulti(event, 'targetMoves', 'Goal Setting', 3)">Goal Setting</button>
-            <button class="multi" onclick="toggleMulti(event, 'targetMoves', 'Transition Routine', 3)">Transition Routine</button>
-            <button class="multi" onclick="toggleMulti(event, 'targetMoves', 'Regulation Support', 3)">Regulation Support</button>
-            <button class="multi" onclick="toggleMulti(event, 'targetMoves', 'Visual Support', 3)">Visual Support</button>
-            <button class="multi" onclick="toggleMulti(event, 'targetMoves', 'Reflection / Repair', 3)">Reflection / Repair</button>
-            <button class="multi" onclick="toggleMulti(event, 'targetMoves', 'Other', 3)">Other</button>
-          </div>
-
-          <label>Moves used (max 3)</label>
-          <div class="button-grid two">
-            <button class="multi" onclick="toggleMulti(event, 'movesUsed', 'Clarity', 3)">Clarity</button>
-            <button class="multi" onclick="toggleMulti(event, 'movesUsed', 'Breathing / Reset', 3)">Breathing / Reset</button>
-            <button class="multi" onclick="toggleMulti(event, 'movesUsed', 'Language Production', 3)">Language Production</button>
-            <button class="multi" onclick="toggleMulti(event, 'movesUsed', 'Interaction Structure', 3)">Interaction Structure</button>
-            <button class="multi" onclick="toggleMulti(event, 'movesUsed', 'Goal Setting', 3)">Goal Setting</button>
-            <button class="multi" onclick="toggleMulti(event, 'movesUsed', 'Transition Routine', 3)">Transition Routine</button>
-            <button class="multi" onclick="toggleMulti(event, 'movesUsed', 'Regulation Support', 3)">Regulation Support</button>
-            <button class="multi" onclick="toggleMulti(event, 'movesUsed', 'Visual Support', 3)">Visual Support</button>
-            <button class="multi" onclick="toggleMulti(event, 'movesUsed', 'Reflection / Repair', 3)">Reflection / Repair</button>
-            <button class="multi" onclick="toggleMulti(event, 'movesUsed', 'Other', 3)">Other</button>
-          </div>
-
-          <label>What helped most?</label>
-          <select id="helpedMost">
-            <option>Clarity</option><option>Structure</option><option>Regulation</option><option>Interaction</option><option>Language Support</option><option>Momentum</option><option>Other</option>
-          </select>
-        </div>
-        <div class="actions"><button class="ghost" onclick="goToStep(2)">Back</button><button class="primary" onclick="goToStep(4)">Next</button></div>
-      </div>
-
-      <div id="step4" class="capture-step" style="display:none;">
-        <div class="card">
-          <div class="section-title">Step 4</div>
-          <h3>Strategic layer</h3>
-          <div class="helper">Tag the support architecture behind the moment.</div>
-          <div class="subgrid two">
-            <div>
-              <label for="supportOrigin">Support origin</label>
-              <select id="supportOrigin">
-                <option>Site-level goal</option><option>Classroom goal</option><option>Student support plan</option><option>In-the-moment teacher move</option><option>Other</option>
-              </select>
-            </div>
-            <div>
-              <label for="moveType">Move type</label>
-              <select id="moveType">
-                <option>Instructional</option><option>Language-support</option><option>Relational</option><option>Regulatory</option><option>Structural / behavioral</option><option>Other</option>
-              </select>
-            </div>
-          </div>
-          <label for="quickNote">Quick note</label>
-          <textarea id="quickNote" placeholder="What stood out?"></textarea>
-        </div>
-        <div class="actions"><button class="ghost" onclick="goToStep(3)">Back</button><button class="ghost" onclick="saveEntry(false)">Save</button><button class="primary" onclick="saveEntry(true)">Save + View Dashboard</button></div>
+  <div id="dashboardScreen" class="screen">
+    <div class="card">
+      <div class="section-title">Filters</div>
+      <div class="filters">
+        <div><label for="filterTarget">Target</label><select id="filterTarget" onchange="loadDashboard()"><option value="All">All</option><option value="Whole Class">Whole Class</option><option value="Group">Group</option><option value="Individual Student">Individual Student</option></select></div>
+        <div><label for="filterEntity">Entity</label><select id="filterEntity" onchange="loadDashboard()"><option value="All">All</option></select></div>
+        <div><label for="filterBlock">Block</label><select id="filterBlock" onchange="loadDashboard()"><option value="All">All</option><option>Morning</option><option>Mid-morning</option><option>After Recess</option><option>After Lunch</option><option>End of Day</option></select></div>
+        <div><label for="filterActivity">Activity</label><select id="filterActivity" onchange="loadDashboard()"><option value="All">All</option><option>Whole Group</option><option>Partner</option><option>Small Group</option><option>Independent</option><option>Transition</option><option>Intervention / Support</option></select></div>
       </div>
     </div>
 
-    <div id="dashboardScreen" class="screen">
-      <div class="card">
-        <div class="section-title">Filters</div>
-        <div class="filters">
-          <div><label for="filterTarget">Target</label><select id="filterTarget" onchange="loadDashboard()"><option value="All">All</option><option value="Whole Class">Whole Class</option><option value="Group">Group</option><option value="Individual Student">Individual Student</option></select></div>
-          <div><label for="filterEntity">Entity</label><select id="filterEntity" onchange="loadDashboard()"><option value="All">All</option></select></div>
-          <div><label for="filterBlock">Block</label><select id="filterBlock" onchange="loadDashboard()"><option value="All">All</option><option>Morning</option><option>Mid-morning</option><option>After Recess</option><option>After Lunch</option><option>End of Day</option></select></div>
-          <div><label for="filterActivity">Activity</label><select id="filterActivity" onchange="loadDashboard()"><option value="All">All</option><option>Whole Group</option><option>Partner</option><option>Small Group</option><option>Independent</option><option>Transition</option><option>Intervention / Support</option></select></div>
-        </div>
-      </div>
+    <div class="hero">
+      <div class="pulse-wrap"><div id="coherencePulse" class="pulse mid"></div></div>
+      <div class="hero-label">Current coherence</div>
+    </div>
 
-      <div class="hero">
-        <div class="pulse-wrap"><div id="coherencePulse" class="pulse mid"></div></div>
-        <div class="hero-label">Current coherence</div>
-      </div>
+    <div class="metrics">
+      <div class="card metric-card"><div class="metric" id="focusAvg">—</div><div class="metric-sub">Focus average</div></div>
+      <div class="card metric-card"><div class="metric" id="engageAvg">—</div><div class="metric-sub">Engagement average</div></div>
+    </div>
 
-      <div class="metrics">
-        <div class="card metric-card"><div class="metric" id="focusAvg">—</div><div class="metric-sub">Focus average</div></div>
-        <div class="card metric-card"><div class="metric" id="engageAvg">—</div><div class="metric-sub">Engagement average</div></div>
-      </div>
+    <div class="card insight-card">
+      <div class="insight-label">Recommended focus</div>
+      <div id="insight" class="insight-text">Save entries to begin seeing patterns.</div>
+    </div>
 
-      <div class="card insight-card">
-        <div class="insight-label">Recommended focus</div>
-        <div id="insight" class="insight-text">Save entries to begin seeing patterns.</div>
+    <div class="card">
+      <div class="section-title">Coaching insight</div>
+      <h3 id="coachingSummary">Patterns will appear after more entries.</h3>
+      <div id="coachingNudge" class="summary"></div>
+      <div class="inline-actions">
+        <button class="ghost" onclick="toggleCoachingDetail()">See pattern</button>
+        <button class="primary" onclick="openFocusPanel()">Hold as focus</button>
       </div>
-
-      <div class="card">
-        <div class="section-title">Target vs used</div>
-        <h3>Intention → action → effect</h3>
-        <div id="targetUsedSummary" class="summary"></div>
+      <div id="coachingDetail" class="hidden">
         <div class="subsection-title">Move impact</div>
-        <div id="targetUsedImpact"></div>
+        <div id="coachingImpact"></div>
         <div class="subsection-title">Planned but not used</div>
-        <div id="plannedNotUsed"></div>
+        <div id="coachingMissed"></div>
       </div>
 
-      <div class="card">
-        <div class="section-title">Trends</div>
-        <h3>Focus and engagement over time</h3>
-        <canvas id="trendChart" width="900" height="220"></canvas>
-      </div>
-
-      <div class="subgrid two">
-        <div class="card"><div class="section-title">By student / group</div><h3>Average combined score</h3><div id="entityBreakdown" class="mini-list"></div></div>
-        <div class="card"><div class="section-title">By context</div><h3>Block of day</h3><div id="blockBreakdown" class="mini-list"></div></div>
-      </div>
-
-      <div class="subgrid two">
-        <div class="card"><div class="section-title">Moves</div><h3>Most effective moves used</h3><div id="moveBreakdown" class="mini-list"></div></div>
-        <div class="card"><div class="section-title">Strategic layer</div><h3>Support origin patterns</h3><div id="originBreakdown" class="mini-list"></div></div>
-      </div>
-
-      <div class="card">
-        <div class="section-title">Latest filtered entry</div>
-        <div id="latestEntry"></div>
+      <div id="focusPanel" class="panel hidden">
+        <div class="subsection-title">Planning / reflection</div>
+        <label for="focusStatement">Focus statement</label>
+        <input id="focusStatement" type="text" />
+        <label for="focusReflection">What are you noticing?</label>
+        <textarea id="focusReflection" placeholder="What feels true about this pattern right now?"></textarea>
+        <label for="focusNextStep">Next step to try</label>
+        <textarea id="focusNextStep" placeholder="What will you try next?"></textarea>
+        <div class="small-actions">
+          <button class="primary" onclick="saveFocusPlan()">Save focus</button>
+          <button class="ghost" onclick="closeFocusPanel()">Close</button>
+        </div>
+        <div id="focusSavedNote" class="focus-note"></div>
       </div>
     </div>
-  </div>
 
-  <div class="nav">
-    <button id="navCapture" class="active" onclick="showScreen('capture')">Capture</button>
-    <button id="navDashboard" onclick="showScreen('dashboard')">Dashboard</button>
-  </div>
+    <div class="card">
+      <div class="section-title">Target vs used</div>
+      <h3>Intention → action → effect</h3>
+      <div id="targetUsedSummary" class="summary"></div>
+      <div class="subsection-title">Move impact</div>
+      <div id="targetUsedImpact"></div>
+      <div class="subsection-title">Planned but not used</div>
+      <div id="plannedNotUsed"></div>
+    </div>
 
-  <div id="toast" class="toast">Saved</div>
+    <div class="card">
+      <div class="section-title">Trends</div>
+      <h3>Focus and engagement over time</h3>
+      <canvas id="trendChart" width="900" height="220"></canvas>
+    </div>
+
+    <div class="subgrid two">
+      <div class="card"><div class="section-title">By student / group</div><h3>Average combined score</h3><div id="entityBreakdown" class="mini-list"></div></div>
+      <div class="card"><div class="section-title">By context</div><h3>Block of day</h3><div id="blockBreakdown" class="mini-list"></div></div>
+    </div>
+
+    <div class="subgrid two">
+      <div class="card"><div class="section-title">Moves</div><h3>Most effective moves used</h3><div id="moveBreakdown" class="mini-list"></div></div>
+      <div class="card"><div class="section-title">Strategic layer</div><h3>Support origin patterns</h3><div id="originBreakdown" class="mini-list"></div></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Latest filtered entry</div>
+      <div id="latestEntry"></div>
+    </div>
+  </div>
+</div>
+
+<div class="nav">
+  <button id="navCapture" class="active" onclick="showScreen('capture')">Capture</button>
+  <button id="navDashboard" onclick="showScreen('dashboard')">Dashboard</button>
+</div>
+
+<div id="toast" class="toast">Saved</div>
 
 <script>
-  let data = {};
-  const entities = {
-    "Whole Class": ["Whole Class"],
-    "Group": ["Group A", "Group B", "Group C"],
-    "Individual Student": ["S01 — Maya", "S02 — Luis", "S03 — Ana", "S04 — Diego"]
-  };
+let data = {};
+const entities = {
+  "Whole Class": ["Whole Class"],
+  "Group": ["Group A", "Group B", "Group C"],
+  "Individual Student": ["S01 — Maya", "S02 — Luis", "S03 — Ana", "S04 — Diego"]
+};
 
-  function handleTargetTypeChange(){
-    const type = document.getElementById("targetType").value;
-    const entitySelect = document.getElementById("entityId");
-    entitySelect.innerHTML = "";
-    entities[type].forEach(item => {
-      const opt = document.createElement("option");
-      opt.value = item; opt.textContent = item;
-      entitySelect.appendChild(opt);
-    });
+function handleTargetTypeChange(){
+  const type = document.getElementById("targetType").value;
+  const entitySelect = document.getElementById("entityId");
+  entitySelect.innerHTML = "";
+  entities[type].forEach(item => {
+    const opt = document.createElement("option");
+    opt.value = item; opt.textContent = item;
+    entitySelect.appendChild(opt);
+  });
+}
+
+function populateEntityFilter(entries){
+  const filterTarget = document.getElementById("filterTarget").value;
+  const filterEntity = document.getElementById("filterEntity");
+  const current = filterEntity.value || "All";
+  let values = ["All"];
+  const seen = new Set();
+  entries.forEach(e => {
+    if(filterTarget !== "All" && e.targetType !== filterTarget) return;
+    if(e.entityId && !seen.has(e.entityId)){ seen.add(e.entityId); values.push(e.entityId); }
+  });
+  filterEntity.innerHTML = values.map(v => `<option value="${v}">${v}</option>`).join("");
+  if(values.includes(current)) filterEntity.value = current;
+}
+
+function getFilteredEntries(allEntries){
+  const target = document.getElementById("filterTarget").value;
+  const entity = document.getElementById("filterEntity").value;
+  const block = document.getElementById("filterBlock").value;
+  const activity = document.getElementById("filterActivity").value;
+  return allEntries.filter(e => {
+    if(target !== "All" && e.targetType !== target) return false;
+    if(entity !== "All" && e.entityId !== entity) return false;
+    if(block !== "All" && e.blockOfDay !== block) return false;
+    if(activity !== "All" && e.activityType !== activity) return false;
+    return true;
+  });
+}
+
+function goToStep(step){
+  document.querySelectorAll(".capture-step").forEach((el, idx) => { el.style.display = (idx === step - 1) ? "block" : "none"; });
+  for(let i=1;i<=4;i++) document.getElementById("step" + i + "bar").classList.toggle("active", i <= step);
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function selectSingle(event, key, value, groupName){
+  const group = document.querySelector('[data-group="' + groupName + '"]');
+  if(group) group.querySelectorAll("button").forEach(btn => btn.classList.remove("selected"));
+  event.currentTarget.classList.add("selected");
+  data[key] = value;
+}
+
+function toggleMulti(event, key, value, maxCount){
+  if(!data[key]) data[key] = [];
+  const btn = event.currentTarget;
+  const already = data[key].includes(value);
+  if(already){
+    data[key] = data[key].filter(v => v !== value);
+    btn.classList.remove("selected");
+    return;
   }
+  if(data[key].length >= maxCount){ showToast("Max " + maxCount + " selections"); return; }
+  data[key].push(value);
+  btn.classList.add("selected");
+}
 
-  function populateEntityFilter(entries){
-    const filterTarget = document.getElementById("filterTarget").value;
-    const filterEntity = document.getElementById("filterEntity");
-    const current = filterEntity.value || "All";
-    let values = ["All"];
-    const seen = new Set();
-    entries.forEach(e => {
-      if(filterTarget !== "All" && e.targetType !== filterTarget) return;
-      if(e.entityId && !seen.has(e.entityId)){ seen.add(e.entityId); values.push(e.entityId); }
-    });
-    filterEntity.innerHTML = values.map(v => `<option value="${v}">${v}</option>`).join("");
-    if(values.includes(current)) filterEntity.value = current;
-  }
+function collectFormData(){
+  data.targetType = document.getElementById("targetType").value;
+  data.entityId = document.getElementById("entityId").value;
+  data.blockOfDay = document.getElementById("blockDay").value;
+  data.activityType = document.getElementById("activityType").value;
+  data.collaborationContext = document.getElementById("collabContext").value;
+  data.collaborationQuality = document.getElementById("collabQuality").value;
+  data.helpedMost = document.getElementById("helpedMost").value;
+  data.supportOrigin = document.getElementById("supportOrigin").value;
+  data.moveType = document.getElementById("moveType").value;
+  data.quickNote = document.getElementById("quickNote").value.trim();
+}
 
-  function getFilteredEntries(allEntries){
-    const target = document.getElementById("filterTarget").value;
-    const entity = document.getElementById("filterEntity").value;
-    const block = document.getElementById("filterBlock").value;
-    const activity = document.getElementById("filterActivity").value;
-    return allEntries.filter(e => {
-      if(target !== "All" && e.targetType !== target) return false;
-      if(entity !== "All" && e.entityId !== entity) return false;
-      if(block !== "All" && e.blockOfDay !== block) return false;
-      if(activity !== "All" && e.activityType !== activity) return false;
-      return true;
-    });
-  }
+function saveEntry(viewDashboard){
+  collectFormData();
+  const entry = {...data, timestamp: new Date().toISOString()};
+  const entries = JSON.parse(localStorage.getItem("cw_entries") || "[]");
+  entries.push(entry);
+  localStorage.setItem("cw_entries", JSON.stringify(entries));
+  resetCapture();
+  showToast(viewDashboard ? "Saved ✓ — opening dashboard" : "Saved ✓ — ready for next");
+  if(viewDashboard) setTimeout(() => showScreen('dashboard'), 250);
+}
 
-  function goToStep(step){
-    document.querySelectorAll(".capture-step").forEach((el, idx) => { el.style.display = (idx === step - 1) ? "block" : "none"; });
-    for(let i=1;i<=4;i++) document.getElementById("step" + i + "bar").classList.toggle("active", i <= step);
-    window.scrollTo({top:0, behavior:"smooth"});
-  }
-
-  function selectSingle(event, key, value, groupName){
-    const group = document.querySelector('[data-group="' + groupName + '"]');
-    if(group) group.querySelectorAll("button").forEach(btn => btn.classList.remove("selected"));
-    event.currentTarget.classList.add("selected");
-    data[key] = value;
-  }
-
-  function toggleMulti(event, key, value, maxCount){
-    if(!data[key]) data[key] = [];
-    const btn = event.currentTarget;
-    const already = data[key].includes(value);
-    if(already){
-      data[key] = data[key].filter(v => v !== value);
-      btn.classList.remove("selected");
-      return;
-    }
-    if(data[key].length >= maxCount){ showToast("Max " + maxCount + " selections"); return; }
-    data[key].push(value);
-    btn.classList.add("selected");
-  }
-
-  function collectFormData(){
-    data.targetType = document.getElementById("targetType").value;
-    data.entityId = document.getElementById("entityId").value;
-    data.blockOfDay = document.getElementById("blockDay").value;
-    data.activityType = document.getElementById("activityType").value;
-    data.collaborationContext = document.getElementById("collabContext").value;
-    data.collaborationQuality = document.getElementById("collabQuality").value;
-    data.helpedMost = document.getElementById("helpedMost").value;
-    data.supportOrigin = document.getElementById("supportOrigin").value;
-    data.moveType = document.getElementById("moveType").value;
-    data.quickNote = document.getElementById("quickNote").value.trim();
-  }
-
-  function saveEntry(viewDashboard){
-    collectFormData();
-    const entry = {...data, timestamp: new Date().toISOString()};
-    const entries = JSON.parse(localStorage.getItem("cw_entries") || "[]");
-    entries.push(entry);
-    localStorage.setItem("cw_entries", JSON.stringify(entries));
-    resetCapture();
-    showToast(viewDashboard ? "Saved ✓ — opening dashboard" : "Saved ✓ — ready for next");
-    if(viewDashboard) setTimeout(() => showScreen('dashboard'), 250);
-  }
-
-  function resetCapture(){
-    data = {};
-    document.querySelectorAll("button.selected").forEach(b => b.classList.remove("selected"));
-    document.getElementById("targetType").value = "Whole Class";
-    handleTargetTypeChange();
-    document.getElementById("blockDay").value = "Morning";
-    document.getElementById("activityType").value = "Whole Group";
-    document.getElementById("collabContext").value = "Solo";
-    document.getElementById("collabQuality").value = "Strong";
-    document.getElementById("helpedMost").value = "Clarity";
-    document.getElementById("supportOrigin").value = "Site-level goal";
-    document.getElementById("moveType").value = "Instructional";
-    document.getElementById("quickNote").value = "";
-    goToStep(1);
-  }
-
-  function showToast(msg){
-    const toast = document.getElementById("toast");
-    toast.textContent = msg;
-    toast.style.opacity = 1;
-    setTimeout(() => toast.style.opacity = 0, 1600);
-  }
-
-  function showScreen(name){
-    document.getElementById("captureScreen").classList.toggle("active", name === "capture");
-    document.getElementById("dashboardScreen").classList.toggle("active", name === "dashboard");
-    document.getElementById("navCapture").classList.toggle("active", name === "capture");
-    document.getElementById("navDashboard").classList.toggle("active", name === "dashboard");
-    if(name === "dashboard") loadDashboard();
-    window.scrollTo({top:0, behavior:"smooth"});
-  }
-
-  function avg(arr){ return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0; }
-  function combinedScore(entry){ return (Number(entry.focus || 0) + Number(entry.engagement || 0)) / 2; }
-
-  function renderBreakdown(containerId, rows, formatter){
-    const container = document.getElementById(containerId);
-    if(!rows.length){ container.innerHTML = '<div class="summary">Not enough data yet.</div>'; return; }
-    container.innerHTML = rows.map(row => `<div class="mini-row"><div>${row.label}</div><div>${formatter(row.value)}</div></div>`).join("");
-  }
-
-  function renderTargetVsUsed(entries){
-    const impactEl = document.getElementById("targetUsedImpact");
-    const missedEl = document.getElementById("plannedNotUsed");
-    const summaryEl = document.getElementById("targetUsedSummary");
-
-    let targetCount = {}, usedCount = {}, successMap = {};
-    entries.forEach(e => {
-      const score = combinedScore(e);
-      (e.targetMoves || []).forEach(m => { targetCount[m] = (targetCount[m] || 0) + 1; });
-      (e.movesUsed || []).forEach(m => {
-        usedCount[m] = (usedCount[m] || 0) + 1;
-        if(!successMap[m]) successMap[m] = [];
-        successMap[m].push(score);
-      });
-    });
-
-    const impactMoves = Object.keys(successMap).sort((a,b) => avg(successMap[b]) - avg(successMap[a]));
-    if(!impactMoves.length){
-      impactEl.innerHTML = '<div class="summary">No move-use data in this filtered view yet.</div>';
-      missedEl.innerHTML = '<div class="summary">No missed intentions visible yet.</div>';
-      summaryEl.textContent = "Use filters to narrow this view and compare what was intended, what got used, and what lifted outcomes.";
-      return;
-    }
-
-    impactEl.innerHTML = impactMoves.map(m => {
-      const score = avg(successMap[m]);
-      const cls = score >= 4 ? 'good' : score < 3 ? 'low' : 'mixed';
-      const label = score >= 4 ? 'HIGH IMPACT' : score < 3 ? 'LOW IMPACT' : 'MIXED';
-      return `<span class="pill ${cls}">${m} → ${label} (${score.toFixed(1)})</span>`;
-    }).join("");
-
-    const missed = Object.keys(targetCount).filter(m => !usedCount[m]);
-    missedEl.innerHTML = missed.length
-      ? missed.map(m => `<span class="pill low">${m} planned but not used</span>`).join("")
-      : '<div class="summary">No target-move gaps in this filtered view.</div>';
-
-    let topMove = impactMoves[0];
-    let gapCount = missed.length;
-    summaryEl.textContent = gapCount
-      ? `${topMove} is currently your strongest used move in this view, and ${gapCount} target move${gapCount === 1 ? "" : "s"} are being planned without showing up in action.`
-      : `${topMove} is currently your strongest used move in this view, with little gap between intention and action.`;
-  }
-
-  function loadDashboard(){
-    const allEntries = JSON.parse(localStorage.getItem("cw_entries") || "[]");
-    populateEntityFilter(allEntries);
-    const entries = getFilteredEntries(allEntries);
-
-    if(!entries.length){
-      document.getElementById("focusAvg").textContent = "—";
-      document.getElementById("engageAvg").textContent = "—";
-      document.getElementById("insight").textContent = "No entries match the current filters yet.";
-      document.getElementById("entityBreakdown").innerHTML = '<div class="summary">No matching data.</div>';
-      document.getElementById("blockBreakdown").innerHTML = '<div class="summary">No matching data.</div>';
-      document.getElementById("moveBreakdown").innerHTML = '<div class="summary">No matching data.</div>';
-      document.getElementById("originBreakdown").innerHTML = '<div class="summary">No matching data.</div>';
-      document.getElementById("latestEntry").innerHTML = '<div class="summary">No matching entries.</div>';
-      document.getElementById("targetUsedSummary").textContent = "No entries match the current filters yet.";
-      document.getElementById("targetUsedImpact").innerHTML = '<div class="summary">No matching data.</div>';
-      document.getElementById("plannedNotUsed").innerHTML = '<div class="summary">No matching data.</div>';
-      drawTrendChart([], []);
-      const pulse = document.getElementById("coherencePulse");
-      pulse.classList.remove("low", "mid", "high"); pulse.classList.add("mid");
-      return;
-    }
-
-    const focusValues = entries.map(e => Number(e.focus || 0));
-    const engagementValues = entries.map(e => Number(e.engagement || 0));
-    const avgFocus = avg(focusValues), avgEngage = avg(engagementValues);
-    document.getElementById("focusAvg").textContent = avgFocus.toFixed(1);
-    document.getElementById("engageAvg").textContent = avgEngage.toFixed(1);
-
-    const pulseScore = (avgFocus + avgEngage) / 2;
-    const pulse = document.getElementById("coherencePulse");
-    pulse.classList.remove("low", "mid", "high");
-    if(pulseScore < 3) pulse.classList.add("low");
-    else if(pulseScore < 4) pulse.classList.add("mid");
-    else pulse.classList.add("high");
-
-    const clarityNoCount = entries.filter(e => e.studentClarity === "No").length;
-    const afterLunchScores = entries.filter(e => e.blockOfDay === "After Lunch").map(combinedScore);
-    const partnerScores = entries.filter(e => e.activityType === "Partner").map(combinedScore);
-    const transitionScores = entries.filter(e => e.activityType === "Transition").map(combinedScore);
-
-    let insight = "";
-    if(pulseScore < 3) insight = "Coherence is fragile in this filtered view. Begin with regulation, clarity, or a smaller entry point.";
-    else if(afterLunchScores.length >= 2 && avg(afterLunchScores) < pulseScore - 0.5) insight = "After-lunch moments are running lower than this filtered baseline. Consider a stronger reset or tighter re-entry structure there.";
-    else if(partnerScores.length >= 2 && avg(partnerScores) > pulseScore + 0.25) insight = "Partner work is outperforming this view’s baseline. Consider increasing structured interaction earlier in the block.";
-    else if(transitionScores.length >= 2 && avg(transitionScores) < pulseScore - 0.35) insight = "Transitions are dragging the pattern down in this view. Tighten routines or shrink the handoff gap.";
-    else if(clarityNoCount >= 2) insight = "Student clarity is showing up as a recurring constraint in this slice. Sharpen directions, modeling, or visual anchoring.";
-    else insight = "Coherence is building in this filtered view. Protect what is working and keep linking target moves to what helped most.";
-    document.getElementById("insight").textContent = insight;
-
-    renderTargetVsUsed(entries);
-    drawTrendChart(focusValues, engagementValues);
-
-    const entityMap = {};
-    entries.forEach(e => { const key = e.entityId || "—"; if(!entityMap[key]) entityMap[key] = []; entityMap[key].push(combinedScore(e)); });
-    renderBreakdown("entityBreakdown", Object.entries(entityMap).map(([label, arr]) => ({label, value: avg(arr)})).sort((a,b) => b.value - a.value), v => v.toFixed(1));
-
-    const blockMap = {};
-    entries.forEach(e => { const key = e.blockOfDay || "—"; if(!blockMap[key]) blockMap[key] = []; blockMap[key].push(combinedScore(e)); });
-    renderBreakdown("blockBreakdown", Object.entries(blockMap).map(([label, arr]) => ({label, value: avg(arr)})).sort((a,b) => b.value - a.value), v => v.toFixed(1));
-
-    const moveMap = {};
-    entries.forEach(e => { (e.movesUsed || []).forEach(move => { if(!moveMap[move]) moveMap[move] = []; moveMap[move].push(combinedScore(e)); }); });
-    renderBreakdown("moveBreakdown", Object.entries(moveMap).map(([label, arr]) => ({label, value: avg(arr)})).sort((a,b) => b.value - a.value).slice(0,6), v => v.toFixed(1));
-
-    const originMap = {};
-    entries.forEach(e => { const key = e.supportOrigin || "—"; if(!originMap[key]) originMap[key] = []; originMap[key].push(combinedScore(e)); });
-    renderBreakdown("originBreakdown", Object.entries(originMap).map(([label, arr]) => ({label, value: avg(arr)})).sort((a,b) => b.value - a.value), v => v.toFixed(1));
-
-    const latest = entries[entries.length - 1];
-    document.getElementById("latestEntry").innerHTML = `
-      <div class="pill">${latest.targetType || "—"}</div>
-      <div class="pill">${latest.entityId || "—"}</div>
-      <div class="pill">${latest.blockOfDay || "—"}</div>
-      <div class="pill">${latest.activityType || "—"}</div>
-      <div class="pill">${latest.supportOrigin || "—"}</div>
-      <div class="pill">${latest.moveType || "—"}</div>
-      <div class="summary">
-        <strong>Energy:</strong> ${latest.energy || "—"}<br>
-        <strong>Focus:</strong> ${latest.focus || "—"} &nbsp; <strong>Engagement:</strong> ${latest.engagement || "—"}<br>
-        <strong>Clarity:</strong> ${latest.studentClarity || "—"}<br>
-        <strong>Target moves:</strong> ${(latest.targetMoves || []).join(", ") || "—"}<br>
-        <strong>Moves used:</strong> ${(latest.movesUsed || []).join(", ") || "—"}<br>
-        <strong>Helped most:</strong> ${latest.helpedMost || "—"}<br>
-        <strong>Collaboration:</strong> ${latest.collaborationContext || "—"} / ${latest.collaborationQuality || "—"}<br>
-        <strong>Note:</strong> ${latest.quickNote || "—"}
-      </div>`;
-  }
-
-  function drawTrendChart(focusData, engagementData){
-    const canvas = document.getElementById("trendChart");
-    const ctx = canvas.getContext("2d");
-    const w = canvas.width, h = canvas.height;
-    ctx.clearRect(0,0,w,h);
-
-    if(!focusData.length){
-      ctx.fillStyle = "#6b8798";
-      ctx.font = "16px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
-      ctx.fillText("Adjust filters or save entries to see trends.", 20, 40);
-      return;
-    }
-
-    const padding = 26, maxVal = 5, count = Math.max(focusData.length, engagementData.length);
-    ctx.strokeStyle = "rgba(63,95,115,0.08)"; ctx.lineWidth = 1;
-    for(let i=1;i<=5;i++){
-      const y = h - padding - ((h - padding*2) * (i/maxVal));
-      ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(w - padding, y); ctx.stroke();
-    }
-
-    function drawLine(data, color){
-      if(!data.length) return;
-      const stepX = count > 1 ? (w - padding*2) / (count - 1) : 0;
-      ctx.beginPath();
-      ctx.moveTo(padding, h - padding - ((h - padding*2) * (data[0]/maxVal)));
-      for(let i=0;i<data.length-1;i++){
-        const x = padding + i * stepX;
-        const y = h - padding - ((h - padding*2) * (data[i]/maxVal));
-        const nx = padding + (i+1) * stepX;
-        const ny = h - padding - ((h - padding*2) * (data[i+1]/maxVal));
-        const cx = (x + nx) / 2;
-        ctx.quadraticCurveTo(x, y, cx, (y + ny) / 2);
-        ctx.quadraticCurveTo(nx, ny, nx, ny);
-      }
-      ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.stroke();
-      data.forEach((v,i)=>{
-        const x = padding + i * stepX, y = h - padding - ((h - padding*2) * (v/maxVal));
-        ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI*2); ctx.fillStyle = color; ctx.fill();
-      });
-    }
-
-    drawLine(focusData, "#4a90e2");
-    drawLine(engagementData, "#6fcf97");
-
-    ctx.fillStyle = "#4a90e2"; ctx.fillRect(padding, 10, 18, 4);
-    ctx.fillStyle = "#3f5f73"; ctx.font = "13px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
-    ctx.fillText("Focus", padding + 24, 16);
-    ctx.fillStyle = "#6fcf97"; ctx.fillRect(padding + 90, 10, 18, 4);
-    ctx.fillStyle = "#3f5f73"; ctx.fillText("Engagement", padding + 114, 16);
-  }
-
+function resetCapture(){
+  data = {};
+  document.querySelectorAll("button.selected").forEach(b => b.classList.remove("selected"));
+  document.getElementById("targetType").value = "Whole Class";
   handleTargetTypeChange();
+  document.getElementById("blockDay").value = "Morning";
+  document.getElementById("activityType").value = "Whole Group";
+  document.getElementById("collabContext").value = "Solo";
+  document.getElementById("collabQuality").value = "Strong";
+  document.getElementById("helpedMost").value = "Clarity";
+  document.getElementById("supportOrigin").value = "Site-level goal";
+  document.getElementById("moveType").value = "Instructional";
+  document.getElementById("quickNote").value = "";
   goToStep(1);
+}
+
+function showToast(msg){
+  const toast = document.getElementById("toast");
+  toast.textContent = msg;
+  toast.style.opacity = 1;
+  setTimeout(() => toast.style.opacity = 0, 1600);
+}
+
+function showScreen(name){
+  document.getElementById("captureScreen").classList.toggle("active", name === "capture");
+  document.getElementById("dashboardScreen").classList.toggle("active", name === "dashboard");
+  document.getElementById("navCapture").classList.toggle("active", name === "capture");
+  document.getElementById("navDashboard").classList.toggle("active", name === "dashboard");
+  if(name === "dashboard") loadDashboard();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function avg(arr){ return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0; }
+function combinedScore(entry){ return (Number(entry.focus || 0) + Number(entry.engagement || 0)) / 2; }
+
+function renderBreakdown(containerId, rows, formatter){
+  const container = document.getElementById(containerId);
+  if(!rows.length){ container.innerHTML = '<div class="summary">Not enough data yet.</div>'; return; }
+  container.innerHTML = rows.map(row => `<div class="mini-row"><div>${row.label}</div><div>${formatter(row.value)}</div></div>`).join("");
+}
+
+function coachingContext(entries){
+  let moveMap = {}, targetMap = {}, activityScores = {}, clarityNo = 0;
+  entries.forEach(e => {
+    const s = combinedScore(e);
+    if(e.studentClarity === "No") clarityNo++;
+    (e.movesUsed || []).forEach(m => {
+      if(!moveMap[m]) moveMap[m] = [];
+      moveMap[m].push(s);
+    });
+    (e.targetMoves || []).forEach(m => { targetMap[m] = (targetMap[m] || 0) + 1; });
+    if(e.activityType){ if(!activityScores[e.activityType]) activityScores[e.activityType] = []; activityScores[e.activityType].push(s); }
+  });
+
+  let bestMove = null, bestMoveScore = 0;
+  Object.keys(moveMap).forEach(m => {
+    const s = avg(moveMap[m]);
+    if(s > bestMoveScore){ bestMoveScore = s; bestMove = m; }
+  });
+
+  let bestActivity = null, bestActivityScore = 0;
+  Object.keys(activityScores).forEach(a => {
+    const s = avg(activityScores[a]);
+    if(s > bestActivityScore){ bestActivityScore = s; bestActivity = a; }
+  });
+
+  const missed = Object.keys(targetMap).filter(m => !moveMap[m]);
+
+  let summary = "Patterns will appear after more entries.";
+  let nudge = "";
+  if(entries.length){
+    if(clarityNo >= 2){
+      summary = "Clarity is the likely constraint in this filtered view.";
+      nudge = "Tighten modeling or entry directions before adding complexity.";
+    } else if(bestMove && bestActivity){
+      summary = `${bestMove} is your highest-leverage move here, especially in ${bestActivity.toLowerCase()} work.`;
+      nudge = "Use it earlier and more consistently in that context.";
+    } else if(bestMove){
+      summary = `${bestMove} is your strongest move in this filtered view.`;
+      nudge = "Repeat it sooner and with clearer setup.";
+    } else {
+      summary = "Patterns are starting to emerge.";
+      nudge = "Keep logging this context to sharpen the guidance.";
+    }
+  }
+  return { moveMap, missed, summary, nudge };
+}
+
+function renderTargetVsUsed(entries){
+  const impactEl = document.getElementById("targetUsedImpact");
+  const missedEl = document.getElementById("plannedNotUsed");
+  const summaryEl = document.getElementById("targetUsedSummary");
+  let targetCount = {}, usedCount = {}, successMap = {};
+  entries.forEach(e => {
+    const score = combinedScore(e);
+    (e.targetMoves || []).forEach(m => { targetCount[m] = (targetCount[m] || 0) + 1; });
+    (e.movesUsed || []).forEach(m => {
+      usedCount[m] = (usedCount[m] || 0) + 1;
+      if(!successMap[m]) successMap[m] = [];
+      successMap[m].push(score);
+    });
+  });
+
+  const impactMoves = Object.keys(successMap).sort((a,b) => avg(successMap[b]) - avg(successMap[a]));
+  if(!impactMoves.length){
+    impactEl.innerHTML = '<div class="summary">No move-use data in this filtered view yet.</div>';
+    missedEl.innerHTML = '<div class="summary">No missed intentions visible yet.</div>';
+    summaryEl.textContent = "Use filters to narrow this view and compare what was intended, what got used, and what lifted outcomes.";
+    return;
+  }
+
+  impactEl.innerHTML = impactMoves.map(m => {
+    const score = avg(successMap[m]);
+    const cls = score >= 4 ? 'good' : score < 3 ? 'low' : 'mixed';
+    const label = score >= 4 ? 'HIGH IMPACT' : score < 3 ? 'LOW IMPACT' : 'MIXED';
+    return `<span class="pill ${cls}">${m} → ${label} (${score.toFixed(1)})</span>`;
+  }).join("");
+
+  const missed = Object.keys(targetCount).filter(m => !usedCount[m]);
+  missedEl.innerHTML = missed.length ? missed.map(m => `<span class="pill low">${m} planned but not used</span>`).join("") : '<div class="summary">No target-move gaps in this filtered view.</div>';
+
+  let topMove = impactMoves[0];
+  let gapCount = missed.length;
+  summaryEl.textContent = gapCount
+    ? `${topMove} is currently your strongest used move in this view, and ${gapCount} target move${gapCount === 1 ? "" : "s"} are being planned without showing up in action.`
+    : `${topMove} is currently your strongest used move in this view, with little gap between intention and action.`;
+}
+
+function toggleCoachingDetail(){ document.getElementById("coachingDetail").classList.toggle("hidden"); }
+
+function openFocusPanel(){
+  document.getElementById("focusPanel").classList.remove("hidden");
+  document.getElementById("focusStatement").value = document.getElementById("coachingSummary").textContent;
+  document.getElementById("focusSavedNote").textContent = "";
+}
+
+function closeFocusPanel(){ document.getElementById("focusPanel").classList.add("hidden"); }
+
+function saveFocusPlan(){
+  const payload = {
+    focus: document.getElementById("focusStatement").value,
+    reflection: document.getElementById("focusReflection").value,
+    nextStep: document.getElementById("focusNextStep").value,
+    savedAt: new Date().toISOString()
+  };
+  localStorage.setItem("cw_focus_plan", JSON.stringify(payload));
+  document.getElementById("focusSavedNote").textContent = "Focus plan saved.";
+  showToast("Focus plan saved ✓");
+}
+
+function renderCoaching(entries){
+  const ctx = coachingContext(entries);
+  document.getElementById("coachingSummary").textContent = ctx.summary;
+  document.getElementById("coachingNudge").textContent = ctx.nudge;
+
+  const impactHTML = Object.keys(ctx.moveMap).length
+    ? Object.keys(ctx.moveMap).sort((a,b) => avg(ctx.moveMap[b]) - avg(ctx.moveMap[a])).map(m => {
+        const s = avg(ctx.moveMap[m]);
+        const cls = s >= 4 ? "good" : s < 3 ? "low" : "mixed";
+        return `<span class="pill ${cls}">${m} (${s.toFixed(1)})</span>`;
+      }).join("")
+    : '<div class="summary">No move-use data in this filtered view yet.</div>';
+  document.getElementById("coachingImpact").innerHTML = impactHTML;
+  document.getElementById("coachingMissed").innerHTML = ctx.missed.length ? ctx.missed.map(m => `<span class="pill low">${m} planned but not used</span>`).join("") : '<div class="summary">No target-move gaps in this filtered view.</div>';
+
+  const savedPlan = localStorage.getItem("cw_focus_plan");
+  document.getElementById("heldFocus").textContent = savedPlan ? "A focus plan has been saved." : "";
+}
+
+function loadDashboard(){
+  const allEntries = JSON.parse(localStorage.getItem("cw_entries") || "[]");
+  populateEntityFilter(allEntries);
+  const entries = getFilteredEntries(allEntries);
+
+  if(!entries.length){
+    document.getElementById("focusAvg").textContent = "—";
+    document.getElementById("engageAvg").textContent = "—";
+    document.getElementById("insight").textContent = "No entries match the current filters yet.";
+    document.getElementById("entityBreakdown").innerHTML = '<div class="summary">No matching data.</div>';
+    document.getElementById("blockBreakdown").innerHTML = '<div class="summary">No matching data.</div>';
+    document.getElementById("moveBreakdown").innerHTML = '<div class="summary">No matching data.</div>';
+    document.getElementById("originBreakdown").innerHTML = '<div class="summary">No matching data.</div>';
+    document.getElementById("latestEntry").innerHTML = '<div class="summary">No matching entries.</div>';
+    document.getElementById("targetUsedSummary").textContent = "No entries match the current filters yet.";
+    document.getElementById("targetUsedImpact").innerHTML = '<div class="summary">No matching data.</div>';
+    document.getElementById("plannedNotUsed").innerHTML = '<div class="summary">No matching data.</div>';
+    document.getElementById("coachingSummary").textContent = "No entries match the current filters yet.";
+    document.getElementById("coachingNudge").textContent = "";
+    document.getElementById("coachingImpact").innerHTML = '<div class="summary">No matching data.</div>';
+    document.getElementById("coachingMissed").innerHTML = '<div class="summary">No matching data.</div>';
+    drawTrendChart([], []);
+    const pulse = document.getElementById("coherencePulse");
+    pulse.classList.remove("low", "mid", "high"); pulse.classList.add("mid");
+    return;
+  }
+
+  const focusValues = entries.map(e => Number(e.focus || 0));
+  const engagementValues = entries.map(e => Number(e.engagement || 0));
+  const avgFocus = avg(focusValues), avgEngage = avg(engagementValues);
+  document.getElementById("focusAvg").textContent = avgFocus.toFixed(1);
+  document.getElementById("engageAvg").textContent = avgEngage.toFixed(1);
+
+  const pulseScore = (avgFocus + avgEngage) / 2;
+  const pulse = document.getElementById("coherencePulse");
+  pulse.classList.remove("low", "mid", "high");
+  if(pulseScore < 3) pulse.classList.add("low");
+  else if(pulseScore < 4) pulse.classList.add("mid");
+  else pulse.classList.add("high");
+
+  const clarityNoCount = entries.filter(e => e.studentClarity === "No").length;
+  const afterLunchScores = entries.filter(e => e.blockOfDay === "After Lunch").map(combinedScore);
+  const partnerScores = entries.filter(e => e.activityType === "Partner").map(combinedScore);
+  const transitionScores = entries.filter(e => e.activityType === "Transition").map(combinedScore);
+
+  let insight = "";
+  if(pulseScore < 3) insight = "Coherence is fragile in this filtered view. Begin with regulation, clarity, or a smaller entry point.";
+  else if(afterLunchScores.length >= 2 && avg(afterLunchScores) < pulseScore - 0.5) insight = "After-lunch moments are running lower than this filtered baseline. Consider a stronger reset or tighter re-entry structure there.";
+  else if(partnerScores.length >= 2 && avg(partnerScores) > pulseScore + 0.25) insight = "Partner work is outperforming this view’s baseline. Consider increasing structured interaction earlier in the block.";
+  else if(transitionScores.length >= 2 && avg(transitionScores) < pulseScore - 0.35) insight = "Transitions are dragging the pattern down in this view. Tighten routines or shrink the handoff gap.";
+  else if(clarityNoCount >= 2) insight = "Student clarity is showing up as a recurring constraint in this slice. Sharpen directions, modeling, or visual anchoring.";
+  else insight = "Coherence is building in this filtered view. Protect what is working and keep linking target moves to what helped most.";
+  document.getElementById("insight").textContent = insight;
+
+  renderCoaching(entries);
+  renderTargetVsUsed(entries);
+  drawTrendChart(focusValues, engagementValues);
+
+  const entityMap = {};
+  entries.forEach(e => { const key = e.entityId || "—"; if(!entityMap[key]) entityMap[key] = []; entityMap[key].push(combinedScore(e)); });
+  renderBreakdown("entityBreakdown", Object.entries(entityMap).map(([label, arr]) => ({label, value: avg(arr)})).sort((a,b) => b.value - a.value), v => v.toFixed(1));
+
+  const blockMap = {};
+  entries.forEach(e => { const key = e.blockOfDay || "—"; if(!blockMap[key]) blockMap[key] = []; blockMap[key].push(combinedScore(e)); });
+  renderBreakdown("blockBreakdown", Object.entries(blockMap).map(([label, arr]) => ({label, value: avg(arr)})).sort((a,b) => b.value - a.value), v => v.toFixed(1));
+
+  const moveMap = {};
+  entries.forEach(e => { (e.movesUsed || []).forEach(move => { if(!moveMap[move]) moveMap[move] = []; moveMap[move].push(combinedScore(e)); }); });
+  renderBreakdown("moveBreakdown", Object.entries(moveMap).map(([label, arr]) => ({label, value: avg(arr)})).sort((a,b) => b.value - a.value).slice(0,6), v => v.toFixed(1));
+
+  const originMap = {};
+  entries.forEach(e => { const key = e.supportOrigin || "—"; if(!originMap[key]) originMap[key] = []; originMap[key].push(combinedScore(e)); });
+  renderBreakdown("originBreakdown", Object.entries(originMap).map(([label, arr]) => ({label, value: avg(arr)})).sort((a,b) => b.value - a.value), v => v.toFixed(1));
+
+  const latest = entries[entries.length - 1];
+  document.getElementById("latestEntry").innerHTML = `
+    <div class="pill">${latest.targetType || "—"}</div>
+    <div class="pill">${latest.entityId || "—"}</div>
+    <div class="pill">${latest.blockOfDay || "—"}</div>
+    <div class="pill">${latest.activityType || "—"}</div>
+    <div class="pill">${latest.supportOrigin || "—"}</div>
+    <div class="pill">${latest.moveType || "—"}</div>
+    <div class="summary">
+      <strong>Energy:</strong> ${latest.energy || "—"}<br>
+      <strong>Focus:</strong> ${latest.focus || "—"} &nbsp; <strong>Engagement:</strong> ${latest.engagement || "—"}<br>
+      <strong>Clarity:</strong> ${latest.studentClarity || "—"}<br>
+      <strong>Target moves:</strong> ${(latest.targetMoves || []).join(", ") || "—"}<br>
+      <strong>Moves used:</strong> ${(latest.movesUsed || []).join(", ") || "—"}<br>
+      <strong>Helped most:</strong> ${latest.helpedMost || "—"}<br>
+      <strong>Collaboration:</strong> ${latest.collaborationContext || "—"} / ${latest.collaborationQuality || "—"}<br>
+      <strong>Note:</strong> ${latest.quickNote || "—"}
+    </div>`;
+}
+
+function drawTrendChart(focusData, engagementData){
+  const canvas = document.getElementById("trendChart");
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0,0,w,h);
+
+  if(!focusData.length){
+    ctx.fillStyle = "#6b8798";
+    ctx.font = "16px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+    ctx.fillText("Adjust filters or save entries to see trends.", 20, 40);
+    return;
+  }
+
+  const padding = 26, maxVal = 5, count = Math.max(focusData.length, engagementData.length);
+  ctx.strokeStyle = "rgba(63,95,115,0.08)"; ctx.lineWidth = 1;
+  for(let i=1;i<=5;i++){
+    const y = h - padding - ((h - padding*2) * (i/maxVal));
+    ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(w - padding, y); ctx.stroke();
+  }
+
+  function drawLine(data, color){
+    if(!data.length) return;
+    const stepX = count > 1 ? (w - padding*2) / (count - 1) : 0;
+    ctx.beginPath();
+    ctx.moveTo(padding, h - padding - ((h - padding*2) * (data[0]/maxVal)));
+    for(let i=0;i<data.length-1;i++){
+      const x = padding + i * stepX;
+      const y = h - padding - ((h - padding*2) * (data[i]/maxVal));
+      const nx = padding + (i+1) * stepX;
+      const ny = h - padding - ((h - padding*2) * (data[i+1]/maxVal));
+      const cx = (x + nx) / 2;
+      ctx.quadraticCurveTo(x, y, cx, (y + ny) / 2);
+      ctx.quadraticCurveTo(nx, ny, nx, ny);
+    }
+    ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.stroke();
+    data.forEach((v,i)=>{
+      const x = padding + i * stepX, y = h - padding - ((h - padding*2) * (v/maxVal));
+      ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI*2); ctx.fillStyle = color; ctx.fill();
+    });
+  }
+
+  drawLine(focusData, "#4a90e2");
+  drawLine(engagementData, "#6fcf97");
+  ctx.fillStyle = "#4a90e2"; ctx.fillRect(padding, 10, 18, 4);
+  ctx.fillStyle = "#3f5f73"; ctx.font = "13px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+  ctx.fillText("Focus", padding + 24, 16);
+  ctx.fillStyle = "#6fcf97"; ctx.fillRect(padding + 90, 10, 18, 4);
+  ctx.fillStyle = "#3f5f73"; ctx.fillText("Engagement", padding + 114, 16);
+}
+
+handleTargetTypeChange();
+goToStep(1);
 </script>
 </body>
 </html>
