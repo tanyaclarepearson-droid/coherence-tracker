@@ -1,33 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Coherence Tracker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coherence Dashboard</title>
 
 <style>
 body {
-  font-family: Arial;
-  padding: 20px;
-  background: linear-gradient(to bottom,#e8f2ff,#ffffff);
+  font-family: -apple-system, sans-serif;
+  padding: 16px;
+  background: linear-gradient(to bottom, #eaf4ff, #ffffff);
 }
 
-h2 { text-align:center; }
+h2 {
+  text-align: center;
+  margin-bottom: 10px;
+}
 
 .screen { display:none; }
 .active { display:block; }
 
-button {
+button, select {
   width:100%;
   padding:12px;
   margin:6px 0;
-  border-radius:10px;
+  border-radius:14px;
   border:none;
-  background:#e3ecff;
+  background:white;
+  box-shadow:0 2px 6px rgba(0,0,0,0.08);
 }
 
-button.selected { background:#4a90e2; color:white; }
-.next { background:#6fcf97; color:white; }
+button.selected {
+  background:#4a90e2;
+  color:white;
+}
+
+.next {
+  background:#6fcf97;
+  color:white;
+}
 
 .scale button {
   width:18%;
@@ -36,54 +46,59 @@ button.selected { background:#4a90e2; color:white; }
 
 .card {
   background:white;
-  padding:10px;
+  padding:14px;
+  border-radius:16px;
   margin:10px 0;
-  border-radius:10px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+
+.metric {
+  font-size:20px;
+  font-weight:bold;
 }
 
 .bar {
-  height:10px;
+  height:8px;
+  border-radius:6px;
   background:#4a90e2;
-  margin:5px 0;
+  margin:4px 0;
 }
 
+.line {
+  height:2px;
+  background:#ccc;
+  margin:10px 0;
+}
 </style>
 </head>
 
 <body>
 
-<h2>Coherence Tracker</h2>
+<h2>Coherence Dashboard</h2>
 
-<!-- ENTRY FLOW (same as V3) -->
+<!-- ENTRY -->
+<div id="entry" class="screen active">
 
-<div id="screen1" class="screen active">
 <h3>Energy</h3>
 <button onclick="select(this,'energy','Pulled')">Pulled</button>
 <button onclick="select(this,'energy','Mixed')">Mixed</button>
 <button onclick="select(this,'energy','Held')">Held</button>
-<button class="next" onclick="next(2)">Next</button>
-</div>
 
-<div id="screen2" class="screen">
-<h3>Field</h3>
-<button onclick="select(this,'field','Thready')">Thready</button>
-<button onclick="select(this,'field','Settling')">Settling</button>
-<button onclick="select(this,'field','Coherent')">Coherent</button>
-<button onclick="select(this,'field','Vibrant')">Vibrant</button>
-<button class="next" onclick="next(3)">Next</button>
-</div>
+<h3>Student / Group</h3>
+<select onchange="data.student=this.value">
+<option>Whole Class</option>
+<option>Group 1</option>
+<option>Student A</option>
+<option>Student B</option>
+</select>
 
-<div id="screen3" class="screen">
 <h3>Moves (max 2)</h3>
 <button onclick="limitToggle(this,'moves','Language')">Language</button>
 <button onclick="limitToggle(this,'moves','Breathing')">Breathing</button>
 <button onclick="limitToggle(this,'moves','Clarity')">Clarity</button>
 <button onclick="limitToggle(this,'moves','Focus')">Focus</button>
 <button onclick="limitToggle(this,'moves','Interaction')">Interaction</button>
-<button class="next" onclick="next(4)">Next</button>
-</div>
 
-<div id="screen4" class="screen">
 <h3>Focus</h3>
 <div class="scale">
 <button onclick="select(this,'focus','1')">1</button>
@@ -102,42 +117,54 @@ button.selected { background:#4a90e2; color:white; }
 <button onclick="select(this,'engagement','5')">5</button>
 </div>
 
-<button class="next" onclick="next(5)">Next</button>
+<button class="next" onclick="saveEntry()">Save + Dashboard</button>
+
 </div>
 
-<div id="screen5" class="screen">
-<h3>Clarity</h3>
-<button onclick="select(this,'student','Yes')">Yes</button>
-<button onclick="select(this,'student','Partial')">Partial</button>
-<button onclick="select(this,'student','No')">No</button>
+<!-- DASHBOARD -->
+<div id="dashboard" class="screen">
 
-<button class="next" onclick="saveEntry()">Save</button>
-<button onclick="next(6)">Insights</button>
+<div class="card">
+<div class="metric" id="avgFocus"></div>
+Focus Average
 </div>
 
-<!-- INSIGHTS SCREEN -->
+<div class="card">
+<div class="metric" id="avgEngagement"></div>
+Engagement Average
+</div>
 
-<div id="screen6" class="screen">
-<h3>Insights</h3>
+<div class="card">
+<b>Energy Distribution</b>
+<div id="energyBars"></div>
+</div>
 
-<div id="summary"></div>
+<div class="card">
+<b>Focus Trend</b>
+<div id="focusTrend"></div>
+</div>
 
-<h4>Energy Distribution</h4>
-<div id="energyChart"></div>
+<div class="card">
+<b>Engagement Trend</b>
+<div id="engagementTrend"></div>
+</div>
 
-<h4>Average Scores</h4>
-<div id="averages"></div>
+<div class="card">
+<b>Top Moves</b>
+<div id="topMoves"></div>
+</div>
 
-<h4>Most Used Moves</h4>
-<div id="moves"></div>
-
-<h4>Pattern Insight</h4>
-<div id="insightText"></div>
+<div class="card">
+<b>Student Patterns</b>
+<div id="studentPatterns"></div>
+</div>
 
 <button class="next" onclick="location.reload()">New Entry</button>
+
 </div>
 
 <script>
+
 let data={};
 
 function select(btn,key,val){
@@ -147,6 +174,7 @@ function select(btn,key,val){
 
 function limitToggle(btn,key,val){
   if(!data[key]) data[key]=[];
+
   if(data[key].includes(val)){
     data[key]=data[key].filter(v=>v!==val);
     btn.classList.remove("selected");
@@ -158,67 +186,78 @@ function limitToggle(btn,key,val){
   }
 }
 
-function next(n){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById("screen"+n).classList.add("active");
-  if(n===6) loadInsights();
-}
-
 function saveEntry(){
   let entries=JSON.parse(localStorage.getItem("entries")||"[]");
   entries.push({...data});
   localStorage.setItem("entries",JSON.stringify(entries));
-  next(6);
+  loadDashboard();
 }
 
-function loadInsights(){
+function loadDashboard(){
+
+  document.getElementById("entry").classList.remove("active");
+  document.getElementById("dashboard").classList.add("active");
+
   let entries=JSON.parse(localStorage.getItem("entries")||"[]");
 
-  let pulled=0, mixed=0, held=0;
   let focusSum=0, engageSum=0;
-  let moveCounts={};
+  let pulled=0, mixed=0, held=0;
+  let moves={}, students={};
+  let focusTrend=[], engageTrend=[];
 
   entries.forEach(e=>{
+    let f=Number(e.focus||0);
+    let g=Number(e.engagement||0);
+
+    focusSum+=f;
+    engageSum+=g;
+
+    focusTrend.push(f);
+    engageTrend.push(g);
+
     if(e.energy==="Pulled") pulled++;
     if(e.energy==="Mixed") mixed++;
     if(e.energy==="Held") held++;
 
-    focusSum+=Number(e.focus||0);
-    engageSum+=Number(e.engagement||0);
-
     (e.moves||[]).forEach(m=>{
-      moveCounts[m]=(moveCounts[m]||0)+1;
+      moves[m]=(moves[m]||0)+1;
     });
+
+    if(!students[e.student]) students[e.student]=[];
+    students[e.student].push((f+g)/2);
   });
 
   let total=entries.length||1;
 
-  document.getElementById("energyChart").innerHTML=`
-    Pulled <div class="bar" style="width:${pulled*20}px"></div>
-    Mixed <div class="bar" style="width:${mixed*20}px"></div>
-    Held <div class="bar" style="width:${held*20}px"></div>
+  document.getElementById("avgFocus").innerText=(focusSum/total).toFixed(1);
+  document.getElementById("avgEngagement").innerText=(engageSum/total).toFixed(1);
+
+  document.getElementById("energyBars").innerHTML=`
+  Pulled<div class="bar" style="width:${pulled*30}px"></div>
+  Mixed<div class="bar" style="width:${mixed*30}px"></div>
+  Held<div class="bar" style="width:${held*30}px"></div>
   `;
 
-  document.getElementById("averages").innerHTML=`
-    Focus Avg: ${(focusSum/total).toFixed(1)}<br>
-    Engagement Avg: ${(engageSum/total).toFixed(1)}
-  `;
+  document.getElementById("focusTrend").innerHTML=
+    focusTrend.map(v=>`<div class="bar" style="width:${v*20}px"></div>`).join("");
 
-  let movesHTML="";
-  Object.entries(moveCounts).forEach(([m,c])=>{
-    movesHTML+=`${m}: ${c}<br>`;
+  document.getElementById("engagementTrend").innerHTML=
+    engageTrend.map(v=>`<div class="bar" style="width:${v*20}px"></div>`).join("");
+
+  let moveHTML="";
+  Object.entries(moves).forEach(([m,c])=>{
+    moveHTML+=`${m}: ${c}<br>`;
   });
-  document.getElementById("moves").innerHTML=movesHTML;
+  document.getElementById("topMoves").innerHTML=moveHTML;
 
-  let insight="";
-  if(held>pulled){
-    insight="Energy is more often held—coherence is building.";
-  } else {
-    insight="Energy is often pulled—focus on resets and clarity.";
-  }
-
-  document.getElementById("insightText").innerText=insight;
+  let studentHTML="";
+  Object.entries(students).forEach(([s,arr])=>{
+    let avg=(arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(1);
+    studentHTML+=`${s}: ${avg}<br>`;
+  });
+  document.getElementById("studentPatterns").innerHTML=studentHTML;
 }
+
 </script>
 
 </body>
