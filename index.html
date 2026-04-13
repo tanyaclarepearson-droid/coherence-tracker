@@ -9,52 +9,78 @@ body {
   font-family: -apple-system, sans-serif;
   margin: 0;
   background: linear-gradient(180deg,#eef6ff,#ffffff);
+  transition: background 0.6s ease;
 }
 
 .header {
   text-align: center;
-  padding: 12px;
+  padding: 14px;
   font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .container {
   padding: 16px;
 }
 
-.screen { display:none; }
-.active { display:block; }
-
-.card {
-  background: rgba(255,255,255,0.85);
-  padding: 14px;
-  border-radius: 18px;
-  margin-bottom: 12px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+.screen {
+  display: none;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.4s ease;
 }
 
-button, select {
+.screen.active {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card {
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+}
+
+button {
   width: 100%;
   padding: 14px;
   margin: 6px 0;
-  border-radius: 14px;
+  border-radius: 16px;
   border: none;
-  background: white;
-  font-size: 16px;
+  background: rgba(255,255,255,0.85);
+  transition: all 0.25s ease;
+}
+
+button:hover {
+  transform: scale(1.02);
 }
 
 button.selected {
-  background: #4a90e2;
+  transform: scale(1.04);
   color: white;
 }
+
+.red { background: linear-gradient(135deg,#ff6b6b,#ff8e8e); }
+.blue { background: linear-gradient(135deg,#4a90e2,#6fb3ff); }
+.green { background: linear-gradient(135deg,#6fcf97,#8ee3b5); }
 
 .primary {
-  background: #6fcf97;
+  background: linear-gradient(135deg,#6fcf97,#4caf7d);
   color: white;
 }
 
-.scale button {
-  width: 18%;
-  display: inline-block;
+.metric {
+  font-size: 30px;
+  font-weight: 600;
+}
+
+canvas {
+  width: 100%;
+  height: 160px;
 }
 
 .nav {
@@ -63,23 +89,11 @@ button.selected {
   width: 100%;
   display: flex;
   background: white;
-  border-top: 1px solid #ddd;
 }
 
 .nav button {
   flex: 1;
   border-radius: 0;
-  background: white;
-}
-
-.metric {
-  font-size: 26px;
-  font-weight: 600;
-}
-
-canvas {
-  width: 100%;
-  height: 140px;
 }
 
 </style>
@@ -96,55 +110,16 @@ canvas {
 
 <div class="card">
 <h3>Energy</h3>
-<button onclick="select(this,'energy','Pulled')">Pulled</button>
-<button onclick="select(this,'energy','Mixed')">Mixed</button>
-<button onclick="select(this,'energy','Held')">Held</button>
-</div>
-
-<div class="card">
-<h3>Student</h3>
-<select onchange="data.student=this.value">
-<option>Whole Class</option>
-<option>Group 1</option>
-<option>Student A</option>
-<option>Student B</option>
-</select>
-</div>
-
-<div class="card">
-<h3>Moves (max 2)</h3>
-<button onclick="limitToggle(this,'moves','Language')">Language</button>
-<button onclick="limitToggle(this,'moves','Breathing')">Breathing</button>
-<button onclick="limitToggle(this,'moves','Clarity')">Clarity</button>
+<button onclick="select(this,'energy','Pulled','red')" class="red">Pulled</button>
+<button onclick="select(this,'energy','Mixed','blue')" class="blue">Mixed</button>
+<button onclick="select(this,'energy','Held','green')" class="green">Held</button>
 </div>
 
 <div class="card">
 <h3>Focus</h3>
-<div class="scale">
-<button onclick="select(this,'focus','1')">1</button>
-<button onclick="select(this,'focus','2')">2</button>
-<button onclick="select(this,'focus','3')">3</button>
-<button onclick="select(this,'focus','4')">4</button>
-<button onclick="select(this,'focus','5')">5</button>
-</div>
-
-<h3>Engagement</h3>
-<div class="scale">
-<button onclick="select(this,'engagement','1')">1</button>
-<button onclick="select(this,'engagement','2')">2</button>
-<button onclick="select(this,'engagement','3')">3</button>
-<button onclick="select(this,'engagement','4')">4</button>
-<button onclick="select(this,'engagement','5')">5</button>
-</div>
-</div>
-
-<div class="card">
-<h3>What helped most?</h3>
-<button onclick="select(this,'insight','Clarity')">Clarity</button>
-<button onclick="select(this,'insight','Structure')">Structure</button>
-<button onclick="select(this,'insight','Regulation')">Regulation</button>
-<button onclick="select(this,'insight','Interaction')">Interaction</button>
-<button onclick="select(this,'insight','Momentum')">Momentum</button>
+<button onclick="select(this,'focus','2')">Low</button>
+<button onclick="select(this,'focus','3')">Medium</button>
+<button onclick="select(this,'focus','5')">High</button>
 </div>
 
 <button class="primary" onclick="saveEntry()">Save</button>
@@ -160,35 +135,18 @@ Focus
 </div>
 
 <div class="card">
-<div class="metric" id="engageAvg"></div>
-Engagement
+<canvas id="chart"></canvas>
 </div>
 
 <div class="card">
-<b>Focus Trend</b>
-<canvas id="focusChart"></canvas>
-</div>
-
-<div class="card">
-<b>Engagement Trend</b>
-<canvas id="engageChart"></canvas>
-</div>
-
-<div class="card">
-<b>Top Moves</b>
-<div id="moves"></div>
-</div>
-
-<div class="card">
-<b>Big Insight</b>
-<div id="bigInsight"></div>
+<b>Insight</b>
+<div id="insight"></div>
 </div>
 
 </div>
 
 </div>
 
-<!-- NAV -->
 <div class="nav">
 <button onclick="show('capture')">Capture</button>
 <button onclick="show('dashboard')">Dashboard</button>
@@ -204,75 +162,46 @@ function show(screen){
   if(screen==="dashboard") loadDashboard();
 }
 
-function select(btn,key,val){
+function select(btn,key,val,color){
   btn.classList.add("selected");
   data[key]=val;
-}
 
-function limitToggle(btn,key,val){
-  if(!data[key]) data[key]=[];
-
-  if(data[key].includes(val)){
-    data[key]=data[key].filter(v=>v!==val);
-    btn.classList.remove("selected");
-  } else if(data[key].length<2){
-    data[key].push(val);
-    btn.classList.add("selected");
+  if(color==="green"){
+    document.body.style.background="linear-gradient(#e6fff0,#ffffff)";
+  } else if(color==="red"){
+    document.body.style.background="linear-gradient(#ffeaea,#ffffff)";
+  } else {
+    document.body.style.background="linear-gradient(#eef6ff,#ffffff)";
   }
 }
 
 function saveEntry(){
   let entries=JSON.parse(localStorage.getItem("entries")||"[]");
-  entries.push({...data,date:new Date().toISOString()});
+  entries.push({...data});
   localStorage.setItem("entries",JSON.stringify(entries));
   data={};
-  alert("Saved ✔️");
+  alert("Saved");
 }
 
 function loadDashboard(){
   let entries=JSON.parse(localStorage.getItem("entries")||"[]");
 
   let focus=entries.map(e=>Number(e.focus||0));
-  let engage=entries.map(e=>Number(e.engagement||0));
+  let avg=(focus.reduce((a,b)=>a+b,0)/focus.length||0).toFixed(1);
 
-  let avgF=(focus.reduce((a,b)=>a+b,0)/focus.length||0).toFixed(1);
-  let avgE=(engage.reduce((a,b)=>a+b,0)/engage.length||0).toFixed(1);
+  document.getElementById("focusAvg").innerText=avg;
 
-  document.getElementById("focusAvg").innerText=avgF;
-  document.getElementById("engageAvg").innerText=avgE;
+  drawChart(focus);
 
-  drawChart("focusChart",focus);
-  drawChart("engageChart",engage);
+  let insight = avg < 3 
+    ? "Focus is low → add structure or reset"
+    : "Focus stable → maintain patterns";
 
-  let moveCounts={};
-  entries.forEach(e=>{
-    (e.moves||[]).forEach(m=>{
-      moveCounts[m]=(moveCounts[m]||0)+1;
-    });
-  });
-
-  let html="";
-  Object.entries(moveCounts).forEach(([m,c])=>{
-    html+=`${m}: ${c}<br>`;
-  });
-  document.getElementById("moves").innerHTML=html;
-
-  // Big insight
-  let insight="";
-
-  if(avgF < 3){
-    insight="Focus is low. Strengthen clarity or regulation before tasks.";
-  } else if(avgE < 3){
-    insight="Engagement is low. Increase interaction and student talk.";
-  } else {
-    insight="Coherence is strong. Maintain your current patterns.";
-  }
-
-  document.getElementById("bigInsight").innerText=insight;
+  document.getElementById("insight").innerText=insight;
 }
 
-function drawChart(id,data){
-  let canvas=document.getElementById(id);
+function drawChart(data){
+  let canvas=document.getElementById("chart");
   let ctx=canvas.getContext("2d");
 
   ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -282,13 +211,15 @@ function drawChart(id,data){
 
   data.forEach((v,i)=>{
     ctx.quadraticCurveTo(
-      i*40,150-v*25,
-      (i+1)*40,150-(data[i+1]||v)*25
+      i*50,150-v*25,
+      (i+1)*50,150-(data[i+1]||v)*25
     );
   });
 
   ctx.strokeStyle="#4a90e2";
   ctx.lineWidth=3;
+  ctx.shadowBlur=10;
+  ctx.shadowColor="#4a90e2";
   ctx.stroke();
 }
 
