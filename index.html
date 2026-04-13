@@ -2,195 +2,291 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Coherence</title>
+<title>Coherence Works</title>
 
 <style>
 body {
   font-family: -apple-system, sans-serif;
   margin: 0;
-  background: radial-gradient(circle,#eef6ff,#ffffff);
-  transition: background 0.8s ease;
+  background: linear-gradient(180deg,#eef6f9,#ffffff);
 }
 
-.screen {
-  display:none;
-  padding:20px;
-  text-align:center;
+.header {
+  text-align: center;
+  padding: 20px 10px 10px;
 }
 
-.screen.active {
-  display:block;
+.logo {
+  font-size: 26px;
+  font-weight: 500;
+  color: #3f5f73;
 }
 
-h1 {
-  font-size:26px;
-  margin-bottom:10px;
-}
-
-p {
-  opacity:0.7;
-}
-
-button {
-  padding:14px;
-  width:80%;
-  margin-top:20px;
-  border:none;
-  border-radius:16px;
-  background:#4a90e2;
-  color:white;
-  font-size:16px;
+.container {
+  padding: 16px;
 }
 
 .card {
-  background:rgba(255,255,255,0.75);
-  border-radius:20px;
-  padding:16px;
-  margin:16px;
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
 }
 
-.pulse {
-  width:120px;
-  height:120px;
-  margin:20px auto;
-  border-radius:50%;
-  background:radial-gradient(circle,#6fcf97,#4caf7d);
-  animation:pulse 2.5s infinite;
-  opacity:0.7;
+h3 {
+  margin-bottom: 10px;
+  color: #3f5f73;
 }
 
-@keyframes pulse {
-  0% { transform:scale(1); opacity:0.7; }
-  50% { transform:scale(1.2); opacity:1; }
-  100% { transform:scale(1); opacity:0.7; }
+button, select {
+  width: 100%;
+  padding: 14px;
+  margin: 6px 0;
+  border-radius: 14px;
+  border: none;
+  background: #e8f2f7;
+  transition: all 0.2s ease;
+  font-size: 16px;
 }
 
-.low { background:radial-gradient(circle,#ff6b6b,#ff8e8e); }
-.mid { background:radial-gradient(circle,#4a90e2,#7fb6ff); }
-.high { background:radial-gradient(circle,#6fcf97,#8ee3b5); }
+button.selected {
+  background: linear-gradient(135deg,#4a90e2,#6fb3ff);
+  color: white;
+  transform: scale(1.02);
+}
+
+button.multi.selected {
+  background: linear-gradient(135deg,#6fcf97,#8ee3b5);
+}
+
+.primary {
+  background: linear-gradient(135deg,#4a90e2,#6fb3ff);
+  color: white;
+}
 
 .metric {
-  font-size:32px;
-  font-weight:600;
+  font-size: 30px;
+  font-weight: 600;
+  color: #3f5f73;
 }
 
+.sub {
+  opacity: 0.6;
+}
+
+canvas {
+  width: 100%;
+  height: 150px;
+}
+
+.nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  background: white;
+}
+
+.nav button {
+  flex: 1;
+  border-radius: 0;
+}
 </style>
 </head>
 
 <body>
 
-<!-- ONBOARDING -->
-<div id="on1" class="screen active">
-<h1>Teaching is constant decision-making</h1>
-<p>But we rarely see what actually works.</p>
-<button onclick="next('on2')">Next</button>
+<div class="header">
+<div class="logo">Coherence Works</div>
 </div>
 
-<div id="on2" class="screen">
-<h1>Learning depends on coherence</h1>
-<p>When energy is aligned, learning strengthens.</p>
-<button onclick="next('on3')">Next</button>
-</div>
-
-<div id="on3" class="screen">
-<h1>Capture → See → Improve</h1>
-<p>In 20 seconds, you’ll begin to see patterns.</p>
-<button onclick="startApp()">Start</button>
-</div>
+<div class="container">
 
 <!-- CAPTURE -->
-<div id="capture" class="screen">
+<div id="capture">
 
 <div class="card">
 <h3>Energy</h3>
-<button onclick="setEnergy('Pulled')">Pulled</button>
-<button onclick="setEnergy('Mixed')">Mixed</button>
-<button onclick="setEnergy('Held')">Held</button>
+<button onclick="selectSingle(this,'energy','Pulled')">Pulled</button>
+<button onclick="selectSingle(this,'energy','Mixed')">Mixed</button>
+<button onclick="selectSingle(this,'energy','Held')">Held</button>
 </div>
 
 <div class="card">
 <h3>Focus</h3>
-<button onclick="setFocus(2)">Low</button>
-<button onclick="setFocus(3)">Medium</button>
-<button onclick="setFocus(5)">High</button>
+<button onclick="selectSingle(this,'focus',2)">Low</button>
+<button onclick="selectSingle(this,'focus',3)">Medium</button>
+<button onclick="selectSingle(this,'focus',5)">High</button>
 </div>
 
-<button onclick="save()">Save</button>
+<div class="card">
+<h3>Engagement</h3>
+<button onclick="selectSingle(this,'engagement',2)">Low</button>
+<button onclick="selectSingle(this,'engagement',3)">Medium</button>
+<button onclick="selectSingle(this,'engagement',5)">High</button>
+</div>
+
+<div class="card">
+<h3>Moves (max 2)</h3>
+<button class="multi" onclick="toggleMulti(this,'moves','Language')">Language</button>
+<button class="multi" onclick="toggleMulti(this,'moves','Breathing')">Breathing</button>
+<button class="multi" onclick="toggleMulti(this,'moves','Clarity')">Clarity</button>
+<button class="multi" onclick="toggleMulti(this,'moves','Interaction')">Interaction</button>
+</div>
+
+<div class="card">
+<h3>Block</h3>
+<select onchange="data.block=this.value">
+<option>Morning</option>
+<option>After Recess</option>
+<option>After Lunch</option>
+</select>
+</div>
+
+<div class="card">
+<h3>What helped?</h3>
+<button onclick="selectSingle(this,'insight','Clarity')">Clarity</button>
+<button onclick="selectSingle(this,'insight','Structure')">Structure</button>
+<button onclick="selectSingle(this,'insight','Regulation')">Regulation</button>
+<button onclick="selectSingle(this,'insight','Interaction')">Interaction</button>
+</div>
+
+<button class="primary" onclick="saveEntry()">Save</button>
 
 </div>
 
 <!-- DASHBOARD -->
-<div id="dashboard" class="screen">
-
-<div class="pulse" id="pulse"></div>
+<div id="dashboard" style="display:none">
 
 <div class="card">
-<div class="metric" id="avg"></div>
-<p>Average Focus</p>
+<div class="metric" id="focusAvg"></div>
+<div class="sub">Focus</div>
 </div>
 
 <div class="card">
-<p id="insight"></p>
+<div class="metric" id="engageAvg"></div>
+<div class="sub">Engagement</div>
 </div>
 
-<button onclick="next('capture')">New Entry</button>
+<div class="card">
+<canvas id="chart"></canvas>
+</div>
 
+<div class="card">
+<h3>Top Moves</h3>
+<div id="moves"></div>
+</div>
+
+<div class="card">
+<h3>Insight</h3>
+<div id="insight"></div>
+</div>
+
+</div>
+
+</div>
+
+<div class="nav">
+<button onclick="show('capture')">Capture</button>
+<button onclick="show('dashboard')">Dashboard</button>
 </div>
 
 <script>
 
 let data={};
 
-function next(id){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+function show(screen){
+  document.getElementById("capture").style.display = screen==="capture"?"block":"none";
+  document.getElementById("dashboard").style.display = screen==="dashboard"?"block":"none";
+  if(screen==="dashboard") loadDashboard();
 }
 
-function startApp(){
-  next("capture");
+function selectSingle(btn,key,val){
+  let parent=btn.parentNode;
+  parent.querySelectorAll("button").forEach(b=>b.classList.remove("selected"));
+  btn.classList.add("selected");
+  data[key]=val;
 }
 
-function setEnergy(val){
-  data.energy=val;
+function toggleMulti(btn,key,val){
+  if(!data[key]) data[key]=[];
+
+  if(data[key].includes(val)){
+    data[key]=data[key].filter(v=>v!==val);
+    btn.classList.remove("selected");
+  } else {
+    if(data[key].length<2){
+      data[key].push(val);
+      btn.classList.add("selected");
+    }
+  }
 }
 
-function setFocus(val){
-  data.focus=val;
-}
-
-function save(){
+function saveEntry(){
   let entries=JSON.parse(localStorage.getItem("entries")||"[]");
-  entries.push(data);
+  entries.push({...data});
   localStorage.setItem("entries",JSON.stringify(entries));
-  loadDashboard();
+  data={};
+  alert("Saved ✔️");
 }
 
 function loadDashboard(){
-  next("dashboard");
-
   let entries=JSON.parse(localStorage.getItem("entries")||"[]");
 
   let focus=entries.map(e=>e.focus||0);
-  let avg=(focus.reduce((a,b)=>a+b,0)/focus.length||0).toFixed(1);
+  let engage=entries.map(e=>e.engagement||0);
 
-  document.getElementById("avg").innerText=avg;
+  let avgF=(focus.reduce((a,b)=>a+b,0)/focus.length||0).toFixed(1);
+  let avgE=(engage.reduce((a,b)=>a+b,0)/engage.length||0).toFixed(1);
 
-  // pulse color
-  let pulse=document.getElementById("pulse");
-  pulse.className="pulse";
+  document.getElementById("focusAvg").innerText=avgF;
+  document.getElementById("engageAvg").innerText=avgE;
 
-  if(avg < 3) pulse.classList.add("low");
-  else if(avg < 4) pulse.classList.add("mid");
-  else pulse.classList.add("high");
+  drawChart(focus);
 
-  // insight
-  let insight = avg < 3
-    ? "Focus is breaking. Begin with structure or reset."
-    : avg < 4
-    ? "Focus is building. Add interaction earlier."
-    : "Coherence is strong. Maintain your approach.";
+  let moveCounts={};
+  entries.forEach(e=>{
+    (e.moves||[]).forEach(m=>{
+      moveCounts[m]=(moveCounts[m]||0)+1;
+    });
+  });
+
+  let html="";
+  Object.entries(moveCounts).forEach(([m,c])=>{
+    html+=`${m}: ${c}<br>`;
+  });
+  document.getElementById("moves").innerHTML=html;
+
+  let insight = avgF < 3
+    ? "Focus is low. Strengthen clarity or regulation."
+    : avgE < 3
+    ? "Engagement is low. Increase interaction."
+    : "Coherence is building. Maintain your patterns.";
 
   document.getElementById("insight").innerText=insight;
+}
+
+function drawChart(data){
+  let canvas=document.getElementById("chart");
+  let ctx=canvas.getContext("2d");
+
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  ctx.beginPath();
+  ctx.moveTo(0,150-data[0]*25);
+
+  data.forEach((v,i)=>{
+    ctx.quadraticCurveTo(
+      i*40,150-v*25,
+      (i+1)*40,150-(data[i+1]||v)*25
+    );
+  });
+
+  ctx.strokeStyle="#4a90e2";
+  ctx.lineWidth=3;
+  ctx.stroke();
 }
 
 </script>
