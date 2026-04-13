@@ -112,6 +112,23 @@ canvas{width:100%;height:180px;display:block}
       <div class="actions"><button class="primary" onclick="goToStep(2)">Next</button></div>
     </div>
 
+<div class="card">
+  <div class="section-title">Class list tools</div>
+  <h3>Roster editor</h3>
+  <div class="helper">Add a student name here and the student dropdown will auto-sort alphabetically.</div>
+  <label for="newStudentName">Add student</label>
+  <input id="newStudentName" type="text" placeholder="Enter student name" />
+  <div class="small-actions">
+    <button class="primary" onclick="addStudent()">Add student</button>
+    <button class="ghost" onclick="toggleRosterList()">Show roster</button>
+  </div>
+  <div id="rosterList" class="hidden panel">
+    <div class="subsection-title">Current students</div>
+    <div id="rosterNames" class="summary"></div>
+  </div>
+</div>
+
+
     <div id="step2" class="capture-step" style="display:none;">
       <div class="card">
         <div class="section-title">Step 2</div>
@@ -291,15 +308,55 @@ canvas{width:100%;height:180px;display:block}
 
 <script>
 let data = {};
-const entities = {
-  "Whole Class": ["Whole Class"],
-  "Group": ["Group A", "Group B", "Group C"],
-  "Individual Student": ["S01 — Maya", "S02 — Luis", "S03 — Ana", "S04 — Diego"]
+
+const defaultRoster = {
+  groups: ["Group 1", "Group 2", "Group 3", "Group 4"],
+  students: [
+    "Abby","Alice","Aliya","Amelia","Aria","Brooke","Camilla","Cruz",
+    "Hadassah","Luna","Mary Lou","Mateo","Matias","Oriana","Santi",
+    "Sydney","Yosef"
+  ]
 };
+
+function getRoster(){
+  const saved = localStorage.getItem("cw_roster");
+  if(saved){
+    try{
+      const parsed = JSON.parse(saved);
+      return {
+        groups: Array.isArray(parsed.groups) && parsed.groups.length ? parsed.groups : [...defaultRoster.groups],
+        students: Array.isArray(parsed.students) ? parsed.students.slice().sort((a,b)=>a.localeCompare(b)) : [...defaultRoster.students]
+      };
+    } catch(e){}
+  }
+  return {
+    groups: [...defaultRoster.groups],
+    students: [...defaultRoster.students].sort((a,b)=>a.localeCompare(b))
+  };
+}
+
+function saveRoster(roster){
+  roster.students = roster.students
+    .map(s => (s || "").trim())
+    .filter(Boolean)
+    .sort((a,b)=>a.localeCompare(b));
+  localStorage.setItem("cw_roster", JSON.stringify(roster));
+}
+
+function getEntities(){
+  const roster = getRoster();
+  return {
+    "Whole Class": ["Whole Class"],
+    "Group": roster.groups,
+    "Individual Student": roster.students
+  };
+}
+
 
 function handleTargetTypeChange(){
   const type = document.getElementById("targetType").value;
   const entitySelect = document.getElementById("entityId");
+  const entities = getEntities();
   entitySelect.innerHTML = "";
   entities[type].forEach(item => {
     const opt = document.createElement("option");
@@ -698,6 +755,41 @@ function drawTrendChart(focusData, engagementData){
   ctx.fillText("Focus", padding + 24, 16);
   ctx.fillStyle = "#6fcf97"; ctx.fillRect(padding + 90, 10, 18, 4);
   ctx.fillStyle = "#3f5f73"; ctx.fillText("Engagement", padding + 114, 16);
+}
+
+
+function addStudent(){
+  const input = document.getElementById("newStudentName");
+  const name = (input.value || "").trim();
+  if(!name){
+    showToast("Enter a student name");
+    return;
+  }
+  const roster = getRoster();
+  if(roster.students.some(s => s.toLowerCase() === name.toLowerCase())){
+    showToast("Student already exists");
+    return;
+  }
+  roster.students.push(name);
+  saveRoster(roster);
+  input.value = "";
+  handleTargetTypeChange();
+  renderRosterNames();
+  showToast("Student added ✓");
+}
+
+function renderRosterNames(){
+  const el = document.getElementById("rosterNames");
+  if(!el) return;
+  const roster = getRoster();
+  el.innerHTML = roster.students.join("<br>");
+}
+
+function toggleRosterList(){
+  const panel = document.getElementById("rosterList");
+  if(!panel) return;
+  panel.classList.toggle("hidden");
+  renderRosterNames();
 }
 
 handleTargetTypeChange();
