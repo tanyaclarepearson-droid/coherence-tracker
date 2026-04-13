@@ -10,7 +10,7 @@
     --bg2:#ffffff;
     --ink:#3f5f73;
     --muted:#6b8798;
-    --card:rgba(255,255,255,0.86);
+    --card:rgba(255,255,255,0.88);
     --line:rgba(63,95,115,0.10);
     --blue1:#4a90e2;
     --blue2:#6fb3ff;
@@ -20,6 +20,8 @@
     --red2:#ffabab;
     --teal1:#5ab7c9;
     --teal2:#8fd7de;
+    --amber1:#f3b35e;
+    --amber2:#f7cf88;
   }
 
   * { box-sizing:border-box; }
@@ -48,7 +50,7 @@
   .container{
     padding:16px;
     padding-bottom:110px;
-    max-width:920px;
+    max-width:1000px;
     margin:0 auto;
   }
 
@@ -58,7 +60,7 @@
   .card{
     background:var(--card);
     backdrop-filter:blur(12px);
-    border:1px solid rgba(255,255,255,0.7);
+    border:1px solid rgba(255,255,255,0.75);
     border-radius:22px;
     padding:16px;
     margin-bottom:14px;
@@ -208,8 +210,120 @@
     display:grid;
     gap:12px;
   }
+  .metrics{
+    display:grid;
+    gap:12px;
+  }
   @media (min-width:700px){
-    .subgrid.two{ grid-template-columns:1fr 1fr; }
+    .subgrid.two, .metrics{ grid-template-columns:1fr 1fr; }
+  }
+
+  .metric-card{
+    text-align:center;
+    padding:18px 14px;
+  }
+  .metric{
+    font-size:34px;
+    font-weight:700;
+    line-height:1;
+    color:var(--ink);
+  }
+  .metric-sub{
+    margin-top:8px;
+    font-size:14px;
+    color:var(--muted);
+  }
+
+  .hero{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    margin-bottom:16px;
+  }
+  .pulse-wrap{
+    display:flex;
+    justify-content:center;
+    margin-bottom:10px;
+  }
+  .pulse{
+    width:96px;
+    height:96px;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(74,144,226,.95), rgba(111,179,255,.30));
+    animation:pulse 2.6s infinite ease-in-out;
+    transition:all .4s ease;
+  }
+  .pulse.low{
+    background:radial-gradient(circle, rgba(255,125,125,.95), rgba(255,171,171,.28));
+  }
+  .pulse.mid{
+    background:radial-gradient(circle, rgba(90,183,201,.95), rgba(143,215,222,.28));
+  }
+  .pulse.high{
+    background:radial-gradient(circle, rgba(111,207,151,.95), rgba(142,227,181,.32));
+  }
+  @keyframes pulse{
+    0% { transform:scale(1); opacity:.88; }
+    50% { transform:scale(1.08); opacity:1; }
+    100% { transform:scale(1); opacity:.88; }
+  }
+
+  .hero-label{
+    font-size:14px;
+    color:var(--muted);
+  }
+
+  .insight-card{
+    border-left:4px solid #7db7d9;
+    background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(238,246,249,.92));
+  }
+  .insight-label{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.4px;
+    color:var(--muted);
+    margin-bottom:8px;
+  }
+  .insight-text{
+    font-size:17px;
+    line-height:1.4;
+  }
+
+  canvas{
+    width:100%;
+    height:180px;
+    display:block;
+  }
+
+  .mini-list{
+    display:grid;
+    gap:8px;
+  }
+  .mini-row{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:10px 0;
+    border-top:1px solid var(--line);
+  }
+  .mini-row:first-child{ border-top:none; }
+
+  .pill{
+    display:inline-block;
+    padding:6px 10px;
+    border-radius:999px;
+    background:#eef6f9;
+    border:1px solid var(--line);
+    margin:4px 6px 0 0;
+    font-size:13px;
+    color:var(--ink);
+  }
+
+  .summary{
+    font-size:14px;
+    color:var(--muted);
+    line-height:1.4;
+    margin-top:10px;
   }
 
   .toast{
@@ -226,35 +340,12 @@
     z-index:30;
     pointer-events:none;
   }
-
-  .summary{
-    font-size:14px;
-    color:var(--muted);
-    line-height:1.4;
-    margin-top:10px;
-  }
-
-  .pill{
-    display:inline-block;
-    padding:6px 10px;
-    border-radius:999px;
-    background:#eef6f9;
-    border:1px solid var(--line);
-    margin:4px 6px 0 0;
-    font-size:13px;
-    color:var(--ink);
-  }
-
-  .count{
-    font-size:28px;
-    font-weight:600;
-  }
 </style>
 </head>
 <body>
   <div class="header">
     <div class="logo">Coherence Works</div>
-    <div class="tagline">Next-version capture flow</div>
+    <div class="tagline">Richer dashboard build</div>
   </div>
 
   <div class="container">
@@ -463,10 +554,6 @@
 
           <label for="quickNote">Quick note</label>
           <textarea id="quickNote" placeholder="What stood out?"></textarea>
-
-          <div class="summary">
-            This build strengthens capture first. The dashboard can now be expanded around student/group, support-origin, move-type, and collaboration patterns.
-          </div>
         </div>
 
         <div class="actions">
@@ -478,16 +565,66 @@
     </div>
 
     <div id="dashboardScreen" class="screen">
-      <div class="card">
-        <div class="section-title">Dashboard preview</div>
-        <h3>Latest entry</h3>
-        <div id="latestEntry"></div>
+      <div class="hero">
+        <div class="pulse-wrap">
+          <div id="coherencePulse" class="pulse mid"></div>
+        </div>
+        <div class="hero-label">Current coherence</div>
+      </div>
+
+      <div class="metrics">
+        <div class="card metric-card">
+          <div class="metric" id="focusAvg">—</div>
+          <div class="metric-sub">Focus average</div>
+        </div>
+        <div class="card metric-card">
+          <div class="metric" id="engageAvg">—</div>
+          <div class="metric-sub">Engagement average</div>
+        </div>
+      </div>
+
+      <div class="card insight-card">
+        <div class="insight-label">Recommended focus</div>
+        <div id="insight" class="insight-text">Save entries to begin seeing patterns.</div>
       </div>
 
       <div class="card">
-        <div class="section-title">Saved entries</div>
-        <div class="count" id="entryCount"></div>
-        <div class="summary">This preview is intentionally light. The next dashboard can build directly from this stronger data model.</div>
+        <div class="section-title">Trends</div>
+        <h3>Focus and engagement over time</h3>
+        <canvas id="trendChart" width="900" height="220"></canvas>
+      </div>
+
+      <div class="subgrid two">
+        <div class="card">
+          <div class="section-title">By student / group</div>
+          <h3>Average combined score</h3>
+          <div id="entityBreakdown" class="mini-list"></div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">By context</div>
+          <h3>Block of day</h3>
+          <div id="blockBreakdown" class="mini-list"></div>
+        </div>
+      </div>
+
+      <div class="subgrid two">
+        <div class="card">
+          <div class="section-title">Moves</div>
+          <h3>Most effective moves used</h3>
+          <div id="moveBreakdown" class="mini-list"></div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">Strategic layer</div>
+          <h3>Support origin patterns</h3>
+          <div id="originBreakdown" class="mini-list"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Latest entry</div>
+        <div id="latestEntry"></div>
       </div>
     </div>
   </div>
@@ -622,39 +759,236 @@
     document.getElementById("navDashboard").classList.toggle("active", name === "dashboard");
 
     if(name === "dashboard"){
-      loadDashboardPreview();
+      loadDashboard();
     }
     window.scrollTo({top:0, behavior:"smooth"});
   }
 
-  function loadDashboardPreview(){
+  function avg(arr){
+    if(!arr.length) return 0;
+    return arr.reduce((a,b)=>a+b,0) / arr.length;
+  }
+
+  function combinedScore(entry){
+    const f = Number(entry.focus || 0);
+    const e = Number(entry.engagement || 0);
+    return (f + e) / 2;
+  }
+
+  function renderBreakdown(containerId, rows, formatter){
+    const container = document.getElementById(containerId);
+    if(!rows.length){
+      container.innerHTML = '<div class="summary">Not enough data yet.</div>';
+      return;
+    }
+    container.innerHTML = rows.map(row => `
+      <div class="mini-row">
+        <div>${row.label}</div>
+        <div>${formatter(row.value)}</div>
+      </div>
+    `).join("");
+  }
+
+  function loadDashboard(){
     const entries = JSON.parse(localStorage.getItem("cw_entries") || "[]");
-    document.getElementById("entryCount").textContent = entries.length + (entries.length === 1 ? " saved entry" : " saved entries");
 
     if(!entries.length){
-      document.getElementById("latestEntry").innerHTML = '<div class="summary">No entries yet. Save one from Capture to preview the data structure.</div>';
+      document.getElementById("focusAvg").textContent = "—";
+      document.getElementById("engageAvg").textContent = "—";
+      document.getElementById("insight").textContent = "Save entries to begin seeing patterns.";
+      document.getElementById("entityBreakdown").innerHTML = '<div class="summary">No entries yet.</div>';
+      document.getElementById("blockBreakdown").innerHTML = '<div class="summary">No entries yet.</div>';
+      document.getElementById("moveBreakdown").innerHTML = '<div class="summary">No entries yet.</div>';
+      document.getElementById("originBreakdown").innerHTML = '<div class="summary">No entries yet.</div>';
+      document.getElementById("latestEntry").innerHTML = '<div class="summary">No entries yet.</div>';
+      drawTrendChart([], []);
       return;
     }
 
-    const e = entries[entries.length - 1];
+    const focusValues = entries.map(e => Number(e.focus || 0));
+    const engagementValues = entries.map(e => Number(e.engagement || 0));
+
+    const avgFocus = avg(focusValues);
+    const avgEngage = avg(engagementValues);
+    document.getElementById("focusAvg").textContent = avgFocus.toFixed(1);
+    document.getElementById("engageAvg").textContent = avgEngage.toFixed(1);
+
+    const pulseScore = (avgFocus + avgEngage) / 2;
+    const pulse = document.getElementById("coherencePulse");
+    pulse.classList.remove("low", "mid", "high");
+    if(pulseScore < 3){
+      pulse.classList.add("low");
+    } else if(pulseScore < 4){
+      pulse.classList.add("mid");
+    } else {
+      pulse.classList.add("high");
+    }
+
+    let insight = "";
+    const clarityNoCount = entries.filter(e => e.studentClarity === "No").length;
+    const afterLunchScores = entries.filter(e => e.blockOfDay === "After Lunch").map(combinedScore);
+    const partnerScores = entries.filter(e => e.activityType === "Partner").map(combinedScore);
+    const groupScores = entries.filter(e => e.targetType === "Group").map(combinedScore);
+
+    if(pulseScore < 3){
+      insight = "Coherence is fragile right now. Begin with regulation, clarity, or a smaller entry point.";
+    } else if(afterLunchScores.length >= 2 && avg(afterLunchScores) < pulseScore - 0.5){
+      insight = "After-lunch moments are running lower than your overall pattern. Consider a stronger reset or tighter re-entry structure there.";
+    } else if(partnerScores.length >= 2 && avg(partnerScores) > pulseScore + 0.25){
+      insight = "Partner work is outperforming your overall baseline. Consider increasing structured interaction earlier in the block.";
+    } else if(clarityNoCount >= 2){
+      insight = "Student clarity is showing up as a recurring constraint. Sharpen directions, modeling, or visual anchoring.";
+    } else if(groupScores.length >= 2 && avg(groupScores) < pulseScore - 0.4){
+      insight = "Group-targeted entries are running lower than your overall pattern. Review grouping support and collaboration structure.";
+    } else {
+      insight = "Coherence is building. Protect what is working and keep linking target moves to what helped most.";
+    }
+    document.getElementById("insight").textContent = insight;
+
+    drawTrendChart(focusValues, engagementValues);
+
+    // By entity
+    const entityMap = {};
+    entries.forEach(e => {
+      const key = e.entityId || "—";
+      if(!entityMap[key]) entityMap[key] = [];
+      entityMap[key].push(combinedScore(e));
+    });
+    const entityRows = Object.entries(entityMap)
+      .map(([label, arr]) => ({label, value: avg(arr)}))
+      .sort((a,b) => b.value - a.value);
+    renderBreakdown("entityBreakdown", entityRows, v => v.toFixed(1));
+
+    // By block
+    const blockMap = {};
+    entries.forEach(e => {
+      const key = e.blockOfDay || "—";
+      if(!blockMap[key]) blockMap[key] = [];
+      blockMap[key].push(combinedScore(e));
+    });
+    const blockRows = Object.entries(blockMap)
+      .map(([label, arr]) => ({label, value: avg(arr)}))
+      .sort((a,b) => b.value - a.value);
+    renderBreakdown("blockBreakdown", blockRows, v => v.toFixed(1));
+
+    // Moves used effectiveness
+    const moveMap = {};
+    entries.forEach(e => {
+      (e.movesUsed || []).forEach(move => {
+        if(!moveMap[move]) moveMap[move] = [];
+        moveMap[move].push(combinedScore(e));
+      });
+    });
+    const moveRows = Object.entries(moveMap)
+      .map(([label, arr]) => ({label, value: avg(arr)}))
+      .sort((a,b) => b.value - a.value)
+      .slice(0,6);
+    renderBreakdown("moveBreakdown", moveRows, v => v.toFixed(1));
+
+    // Support origin patterns
+    const originMap = {};
+    entries.forEach(e => {
+      const key = e.supportOrigin || "—";
+      if(!originMap[key]) originMap[key] = [];
+      originMap[key].push(combinedScore(e));
+    });
+    const originRows = Object.entries(originMap)
+      .map(([label, arr]) => ({label, value: avg(arr)}))
+      .sort((a,b) => b.value - a.value);
+    renderBreakdown("originBreakdown", originRows, v => v.toFixed(1));
+
+    const latest = entries[entries.length - 1];
     document.getElementById("latestEntry").innerHTML = `
-      <div class="pill">${e.targetType}</div>
-      <div class="pill">${e.entityId}</div>
-      <div class="pill">${e.blockOfDay}</div>
-      <div class="pill">${e.activityType}</div>
-      <div class="pill">${e.supportOrigin}</div>
-      <div class="pill">${e.moveType}</div>
+      <div class="pill">${latest.targetType || "—"}</div>
+      <div class="pill">${latest.entityId || "—"}</div>
+      <div class="pill">${latest.blockOfDay || "—"}</div>
+      <div class="pill">${latest.activityType || "—"}</div>
+      <div class="pill">${latest.supportOrigin || "—"}</div>
+      <div class="pill">${latest.moveType || "—"}</div>
       <div class="summary">
-        <strong>Energy:</strong> ${e.energy || "—"}<br>
-        <strong>Focus:</strong> ${e.focus || "—"} &nbsp; <strong>Engagement:</strong> ${e.engagement || "—"}<br>
-        <strong>Clarity:</strong> ${e.studentClarity || "—"}<br>
-        <strong>Target moves:</strong> ${(e.targetMoves || []).join(", ") || "—"}<br>
-        <strong>Moves used:</strong> ${(e.movesUsed || []).join(", ") || "—"}<br>
-        <strong>Helped most:</strong> ${e.helpedMost || "—"}<br>
-        <strong>Collaboration:</strong> ${e.collaborationContext || "—"} / ${e.collaborationQuality || "—"}<br>
-        <strong>Note:</strong> ${e.quickNote || "—"}
+        <strong>Energy:</strong> ${latest.energy || "—"}<br>
+        <strong>Focus:</strong> ${latest.focus || "—"} &nbsp; <strong>Engagement:</strong> ${latest.engagement || "—"}<br>
+        <strong>Clarity:</strong> ${latest.studentClarity || "—"}<br>
+        <strong>Target moves:</strong> ${(latest.targetMoves || []).join(", ") || "—"}<br>
+        <strong>Moves used:</strong> ${(latest.movesUsed || []).join(", ") || "—"}<br>
+        <strong>Helped most:</strong> ${latest.helpedMost || "—"}<br>
+        <strong>Collaboration:</strong> ${latest.collaborationContext || "—"} / ${latest.collaborationQuality || "—"}<br>
+        <strong>Note:</strong> ${latest.quickNote || "—"}
       </div>
     `;
+  }
+
+  function drawTrendChart(focusData, engagementData){
+    const canvas = document.getElementById("trendChart");
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width;
+    const h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+
+    if(!focusData.length){
+      ctx.fillStyle = "#6b8798";
+      ctx.font = "16px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      ctx.fillText("Save entries to see trends.", 20, 40);
+      return;
+    }
+
+    const padding = 26;
+    const maxVal = 5;
+    const count = Math.max(focusData.length, engagementData.length);
+
+    // grid
+    ctx.strokeStyle = "rgba(63,95,115,0.08)";
+    ctx.lineWidth = 1;
+    for(let i=1;i<=5;i++){
+      const y = h - padding - ((h - padding*2) * (i/maxVal));
+      ctx.beginPath();
+      ctx.moveTo(padding, y);
+      ctx.lineTo(w - padding, y);
+      ctx.stroke();
+    }
+
+    function drawLine(data, color){
+      if(!data.length) return;
+      const stepX = count > 1 ? (w - padding*2) / (count - 1) : 0;
+      ctx.beginPath();
+      ctx.moveTo(padding, h - padding - ((h - padding*2) * (data[0]/maxVal)));
+      for(let i=0;i<data.length-1;i++){
+        const x = padding + i * stepX;
+        const y = h - padding - ((h - padding*2) * (data[i]/maxVal));
+        const nx = padding + (i+1) * stepX;
+        const ny = h - padding - ((h - padding*2) * (data[i+1]/maxVal));
+        const cx = (x + nx) / 2;
+        ctx.quadraticCurveTo(x, y, cx, (y + ny) / 2);
+        ctx.quadraticCurveTo(nx, ny, nx, ny);
+      }
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      data.forEach((v,i)=>{
+        const x = padding + i * stepX;
+        const y = h - padding - ((h - padding*2) * (v/maxVal));
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI*2);
+        ctx.fillStyle = color;
+        ctx.fill();
+      });
+    }
+
+    drawLine(focusData, "#4a90e2");
+    drawLine(engagementData, "#6fcf97");
+
+    // legend
+    ctx.fillStyle = "#4a90e2";
+    ctx.fillRect(padding, 10, 18, 4);
+    ctx.fillStyle = "#3f5f73";
+    ctx.font = "13px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+    ctx.fillText("Focus", padding + 24, 16);
+
+    ctx.fillStyle = "#6fcf97";
+    ctx.fillRect(padding + 90, 10, 18, 4);
+    ctx.fillStyle = "#3f5f73";
+    ctx.fillText("Engagement", padding + 114, 16);
   }
 
   handleTargetTypeChange();
